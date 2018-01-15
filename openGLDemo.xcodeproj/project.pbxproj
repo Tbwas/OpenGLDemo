@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		D8E9B2D7200D04AE00BA362E /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D8E9B2D6200D04AE00BA362E /* main.cpp */; };
+		D8E9B2DF200D056400BA362E /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D8E9B2DE200D056400BA362E /* OpenGL.framework */; };
+		D8E9B2E1200D058400BA362E /* libglfw.3.2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = D8E9B2E0200D058400BA362E /* libglfw.3.2.dylib */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -25,6 +27,8 @@
 /* Begin PBXFileReference section */
 		D8E9B2D3200D04AE00BA362E /* openGLDemo */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = openGLDemo; sourceTree = BUILT_PRODUCTS_DIR; };
 		D8E9B2D6200D04AE00BA362E /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
+		D8E9B2DE200D056400BA362E /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
+		D8E9B2E0200D058400BA362E /* libglfw.3.2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libglfw.3.2.dylib; path = ../../../../usr/local/Cellar/glfw/3.2.1/lib/libglfw.3.2.dylib; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -32,6 +36,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D8E9B2E1200D058400BA362E /* libglfw.3.2.dylib in Frameworks */,
+				D8E9B2DF200D056400BA362E /* OpenGL.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -43,6 +49,7 @@
 			children = (
 				D8E9B2D5200D04AE00BA362E /* openGLDemo */,
 				D8E9B2D4200D04AE00BA362E /* Products */,
+				D8E9B2DD200D056400BA362E /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -60,6 +67,15 @@
 				D8E9B2D6200D04AE00BA362E /* main.cpp */,
 			);
 			path = openGLDemo;
+			sourceTree = "<group>";
+		};
+		D8E9B2DD200D056400BA362E /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				D8E9B2E0200D058400BA362E /* libglfw.3.2.dylib */,
+				D8E9B2DE200D056400BA362E /* OpenGL.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -216,6 +232,8 @@
 		D8E9B2DB200D04AE00BA362E /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				HEADER_SEARCH_PATHS = /usr/local/Cellar/glfw/3.2.1/include/GLFW;
+				LIBRARY_SEARCH_PATHS = /usr/local/Cellar/glfw/3.2.1/lib;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -223,6 +241,8 @@
 		D8E9B2DC200D04AE00BA362E /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				HEADER_SEARCH_PATHS = /usr/local/Cellar/glfw/3.2.1/include/GLFW;
+				LIBRARY_SEARCH_PATHS = /usr/local/Cellar/glfw/3.2.1/lib;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
