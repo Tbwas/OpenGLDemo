@@ -9,13 +9,27 @@
 #include <iostream>
 #include <glfw3.h>
 
+using namespace std;
+
+#pragma mark - Declaration
+
+void initWindowMakeVisible();
 void Render();
+void processInputEvent(GLFWwindow *window, int key, int scanCode, int action, int mods);
+
+#pragma mark - Main
 
 int main(int argc, const char * argv[]) {
-    
+    initWindowMakeVisible();
+    return 0;
+}
+
+#pragma mark - Implementation
+
+void initWindowMakeVisible() {
     GLFWwindow *window;
     if (!glfwInit()) {
-        return -1;
+        return;
     }
     window = glfwCreateWindow(640, 480, "Hi, OpenGL!  I'm dongxin.", NULL, NULL);
     if (!window) {
@@ -24,6 +38,10 @@ int main(int argc, const char * argv[]) {
     }
     
     glfwMakeContextCurrent(window);
+    
+    glViewport(0, 0, 200, 200);
+    glfwSetKeyCallback(window, processInputEvent);
+    
     while (!glfwWindowShouldClose(window)) {
         Render();
         glfwSwapBuffers(window);
@@ -31,8 +49,6 @@ int main(int argc, const char * argv[]) {
     }
     glfwTerminate();
     exit(EXIT_SUCCESS);
-    
-    return 0;
 }
 
 void Render(void) {
@@ -52,3 +68,60 @@ void Render(void) {
     }
     glEnd();
 }
+
+void processInputEvent(GLFWwindow *window, int key, int scanCode, int action, int mods) {
+    cout<< "key is:" << key <<endl;
+    cout<< "scanCode is:" << scanCode <<endl;
+    cout<< "action is:" << action <<endl;
+    cout<< "mods is:" << mods <<endl;
+    
+    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_RELEASE) {
+        glfwSetWindowShouldClose(window, true);
+        glfwTerminate();
+        exit(EXIT_SUCCESS);
+    }
+    
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
