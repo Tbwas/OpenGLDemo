@@ -44,8 +44,8 @@ void initWindowMakeVisible() {
     
     while (!glfwWindowShouldClose(window)) {
         Render();
-        glfwSwapBuffers(window);
-        glfwPollEvents();
+        glfwSwapBuffers(window); // 交换前后缓冲区数据
+        glfwPollEvents(); // 监听事件
     }
     glfwTerminate();
     exit(EXIT_SUCCESS);

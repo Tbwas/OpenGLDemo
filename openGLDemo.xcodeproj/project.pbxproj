@@ -10,6 +10,7 @@
 		D8E9B2D7200D04AE00BA362E /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D8E9B2D6200D04AE00BA362E /* main.cpp */; };
 		D8E9B2DF200D056400BA362E /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D8E9B2DE200D056400BA362E /* OpenGL.framework */; };
 		D8E9B2E1200D058400BA362E /* libglfw.3.2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = D8E9B2E0200D058400BA362E /* libglfw.3.2.dylib */; };
+		FA5D8337201C5F8F009059B5 /* VertexShader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FA5D8335201C5F8F009059B5 /* VertexShader.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -29,6 +30,8 @@
 		D8E9B2D6200D04AE00BA362E /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		D8E9B2DE200D056400BA362E /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
 		D8E9B2E0200D058400BA362E /* libglfw.3.2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libglfw.3.2.dylib; path = ../../../../usr/local/Cellar/glfw/3.2.1/lib/libglfw.3.2.dylib; sourceTree = "<group>"; };
+		FA5D8335201C5F8F009059B5 /* VertexShader.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = VertexShader.cpp; sourceTree = "<group>"; };
+		FA5D8336201C5F8F009059B5 /* VertexShader.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = VertexShader.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -65,6 +68,8 @@
 			isa = PBXGroup;
 			children = (
 				D8E9B2D6200D04AE00BA362E /* main.cpp */,
+				FA5D8336201C5F8F009059B5 /* VertexShader.hpp */,
+				FA5D8335201C5F8F009059B5 /* VertexShader.cpp */,
 			);
 			path = openGLDemo;
 			sourceTree = "<group>";
@@ -135,6 +140,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FA5D8337201C5F8F009059B5 /* VertexShader.cpp in Sources */,
 				D8E9B2D7200D04AE00BA362E /* main.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -266,6 +272,7 @@
 				D8E9B2DC200D04AE00BA362E /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
