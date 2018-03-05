@@ -7,7 +7,6 @@
 //
 
 #include <iostream>
-
 #include <glew.h>
 #include <glfw3.h>
 #include <fstream>
@@ -42,7 +41,12 @@ void initWindowMakeVisible() {
         exit(EXIT_FAILURE);
     }
     
-    glfwMakeContextCurrent(window); // 将我们窗口的上下文设置为当前线程的主上下文
+    // 将我们窗口的上下文设置为当前线程的主上下文
+    glfwMakeContextCurrent(window);
+    
+    // 创建shader最早时机也不能早于此
+    VertexShader vShader;
+    vShader.createVertexShader();
     
     // 我们必须告诉OpenGL渲染窗口的尺寸大小，这样OpenGL才只能知道怎样相对于窗口大小显示数据和坐标
     // OpenGL幕后使用glViewport中定义的位置和宽高进行2D坐标的转换，将OpenGL中的位置坐标(标准化设备坐标)转换为你的屏幕坐标
@@ -51,8 +55,6 @@ void initWindowMakeVisible() {
     glViewport(0, 0, width, height); // 原点位于左下角
     
     glfwSetKeyCallback(window, processInputEvent); // 注册按键回调
-    
-    createVertexShader();
     
     while (!glfwWindowShouldClose(window)) {
         Render();

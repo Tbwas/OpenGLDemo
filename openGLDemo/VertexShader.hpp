@@ -15,6 +15,11 @@
 /**
  顶点着色器主要的目的是把3D坐标转为另一种3D坐标(标准化设备坐标)，同时顶点着色器允许我们对顶点属性进行一些基本处理。
  */
-void createVertexShader();
+class VertexShader {
+    
+public:
+    void createVertexShader();
+};
+
 
 #endif
