@@ -9,6 +9,7 @@
 #include <iostream>
 #include <glew.h>
 #include <glfw3.h>
+#include <cmath>
 
 #include "VertexShader.hpp"
 #include "FragmentShader.hpp"
@@ -19,7 +20,6 @@ using namespace std;
 #pragma mark - Declaration
 
 void initWindowMakeVisible();
-void Render(GLuint program, GLuint VAO);
 void processInputEvent(GLFWwindow *window, int key, int scanCode, int action, int mods);
 
 #pragma mark - Main
@@ -74,11 +74,30 @@ void initWindowMakeVisible() {
     
     ShaderProgram program;
     GLuint shaderProgram = program.linkVertexShader(vertexShader, fragmentShader);
-    
-    GLuint VAO = program.setupVertextData();
+    GLuint *VAOs = program.setupVertextData();
+    glUseProgram(shaderProgram); // 激活程序对象
     
     while (!glfwWindowShouldClose(window)) {
-        Render(shaderProgram, VAO);
+        
+        // 为了避免看见上一次的渲染结果，所以在每次渲染迭代开始时清屏
+        glClearColor(255.0, 255.0, 255.0, 1.0);
+        glClear(GL_COLOR_BUFFER_BIT); // 清空颜色缓冲区, 之后颜色变为`glClearColor()`所设置的颜色
+        
+        // 颜色更新
+        GLfloat time = glfwGetTime();
+        GLfloat green = (sin(time) / 2) + 0.5;
+        GLint colorLocation = glGetUniformLocation(shaderProgram, "ourColor");
+        glUniform4f(colorLocation, 0.0, green, 0.0, 1.0);
+
+        // 绘制
+        glBindVertexArray(VAOs[0]);
+        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glBindVertexArray(0);
+        
+        glBindVertexArray(VAOs[1]);
+        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glBindVertexArray(0);
+        
         /**
          应用程序使用单缓冲绘图时可能会存在图像闪烁的问题。 这是因为生成的图像不是一下子被绘制出来
          的，而是按照从左到右，由上而下逐像素地绘制而成的。最终图像不是在瞬间显示给用户，而是通过一步一步生成的，这会
@@ -89,25 +108,10 @@ void initWindowMakeVisible() {
         glfwSwapBuffers(window); // 颜色缓冲区存储着GLFW窗口每一个像素颜色
         glfwPollEvents(); // 监听事件
     }
+    glDeleteVertexArrays(2, VAOs); // 删除VAO
     glfwTerminate();
     exit(EXIT_SUCCESS);
 }
-
-void Render(GLuint program, GLuint VAO) {
-    
-    // 为了避免看见上一次的渲染结果，所以在每次渲染迭代开始时清屏
-    glClearColor(255.0, 255.0, 255.0, 1.0);
-    glClear(GL_COLOR_BUFFER_BIT); // 清空颜色缓冲区, 之后颜色变为`glClearColor()`所设置的颜色
-    
-    // 激活程序对象
-    glUseProgram(program);
-    
-    // 绘制
-    glBindVertexArray(VAO);
-    glDrawArrays(GL_TRIANGLES, 0, 3);
-    glBindVertexArray(0);
-}
-
 
 /**
  按键回调

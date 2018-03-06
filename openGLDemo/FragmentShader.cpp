@@ -37,13 +37,6 @@ GLuint FragmentShader:: createFragmentShader() {
     
     // 编译着色器
     const GLchar *shaderSource = shaderString.c_str();
-//    const GLchar *shaderSource = "#version 330 core\n"
-//    "out vec4 color;\n"
-//    "uniform vec4 ourColor;\n"
-//    "void main()\n"
-//    "{\n"
-//    "color = ourColor;\n"
-//    "}\n\0";
     glShaderSource(fragShader, 1, &shaderSource, nullptr);
     glCompileShader(fragShader);
     

@@ -13,27 +13,35 @@
 
 using namespace std;
 
-GLuint ShaderProgram:: setupVertextData() {
+// VAO和VBO还可以是数组
+GLuint* ShaderProgram:: setupVertextData() {
     
-    // 创建VAO
-    GLuint VAO;
-    glGenVertexArrays(1, &VAO);
-    glBindVertexArray(VAO); // 需要先绑定VAO再绑定顶点数据
+    static GLuint VAOs[2], VBOs[2];
+    glGenVertexArrays(2, VAOs); // 创建VAO，缓存数量为2
+    glGenBuffers(2, VBOs); // 创建VBO，缓存数量为2
     
-    GLfloat vertices[] = {
-        -0.5f, -0.5f, 0.0f, // position左下
-        0.5f, -0.5f, 0.0f,  // position右下
-        0.0f,  0.5f, 0.0f   // position顶部
+    GLfloat fistVertices[] = {
+        -0.5, 0.0, 0.0,
+        -0.25, 0.5, 0.0,
+        0.0, 0.0, 0.0
+    };
+    GLfloat secondVertices[] = {
+        0.0, 0.0, 0.0,
+        0.25, 0.5, 0.0,
+        0.5, 0.0, 0.0,
     };
     
-    // 顶点缓冲对象(Vertex Buffer Objects, VBO)管理这个内存，它会在GPU内存(通常被称为显存)中储存大量顶点
-    GLuint VBO;
-    glGenBuffers(1, &VBO); // 创建VBO对象, 1表示需要创建的缓存数量
-    glBindBuffer(GL_ARRAY_BUFFER, VBO); // 绑定缓冲类型，之后我们使用的任何（在GL_ARRAY_BUFFER目标上的）缓冲调用都会用来配置当前绑定的缓冲(VBO)
-    // 有了上述绑定操作之后，就可以将数据复制到VBO管理的内存中
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-    /** 至此，我们已经把顶点数据储存在显卡的内存中，用VBO这个顶点缓冲对象管理 **/
+    // MARK: - 第一个VAO && VBO
+    glBindVertexArray(VAOs[0]); // 需要先绑定VAO再绑定顶点数据
+    glBindBuffer(GL_ARRAY_BUFFER, VBOs[0]);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(fistVertices), fistVertices, GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLfloat *)0);
+    glEnableVertexAttribArray(0);
     
+    // MARK: - 第二个VAO && VBO
+    glBindVertexArray(VAOs[1]);
+    glBindBuffer(GL_ARRAY_BUFFER, VBOs[1]);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(secondVertices), secondVertices, GL_STATIC_DRAW);
     /**
      告诉OpenGL如何解析顶点数据
      
@@ -47,10 +55,12 @@ GLuint ShaderProgram:: setupVertextData() {
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLfloat *)0);
     glEnableVertexAttribArray(0); // 顶点属性默认是禁用，所以这里要启用
     
-    // 解绑VAO
-    glBindVertexArray(0);
+    // VAO会储存glBindBuffer的函数调用, 也就是说，如果在解绑VAO之前解绑了VBO或者EBO，那么VAO会保存解绑操作，之前的所有绑定操作都白玩了.
+    glBindVertexArray(0); // 解绑VAO
+//    glBindBuffer(GL_ARRAY_BUFFER, 0); // 解绑VBO, 貌似不需要该步骤
+    glDeleteBuffers(2, VBOs); // 删除VBO
     
-    return VAO;
+    return VAOs;
 }
 
 GLuint ShaderProgram:: linkVertexShader(GLuint vertexShader, GLuint fragmentShader) {
