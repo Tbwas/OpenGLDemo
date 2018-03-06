@@ -10,6 +10,7 @@
 		D8E9B2D7200D04AE00BA362E /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D8E9B2D6200D04AE00BA362E /* main.cpp */; };
 		D8E9B2DF200D056400BA362E /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D8E9B2DE200D056400BA362E /* OpenGL.framework */; };
 		D8E9B2E1200D058400BA362E /* libglfw.3.2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = D8E9B2E0200D058400BA362E /* libglfw.3.2.dylib */; };
+		FA29E4D8204E77880091374C /* ShaderProgram.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FA29E4D6204E77880091374C /* ShaderProgram.cpp */; };
 		FA31E2EC204CEFB000AF0567 /* FragmentShader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FA31E2EA204CEFB000AF0567 /* FragmentShader.cpp */; };
 		FA5D8337201C5F8F009059B5 /* VertexShader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FA5D8335201C5F8F009059B5 /* VertexShader.cpp */; };
 /* End PBXBuildFile section */
@@ -31,12 +32,14 @@
 		D8E9B2D6200D04AE00BA362E /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		D8E9B2DE200D056400BA362E /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
 		D8E9B2E0200D058400BA362E /* libglfw.3.2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libglfw.3.2.dylib; path = ../../../../usr/local/Cellar/glfw/3.2.1/lib/libglfw.3.2.dylib; sourceTree = "<group>"; };
+		FA29E4D6204E77880091374C /* ShaderProgram.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ShaderProgram.cpp; sourceTree = "<group>"; };
+		FA29E4D7204E77880091374C /* ShaderProgram.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ShaderProgram.hpp; sourceTree = "<group>"; };
+		FA29E4D9204E959F0091374C /* FragmentShader.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = FragmentShader.frag; sourceTree = "<group>"; };
 		FA31E2EA204CEFB000AF0567 /* FragmentShader.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = FragmentShader.cpp; sourceTree = "<group>"; };
 		FA31E2EB204CEFB000AF0567 /* FragmentShader.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = FragmentShader.hpp; sourceTree = "<group>"; };
 		FA5D8335201C5F8F009059B5 /* VertexShader.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = VertexShader.cpp; sourceTree = "<group>"; };
 		FA5D8336201C5F8F009059B5 /* VertexShader.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = VertexShader.hpp; sourceTree = "<group>"; };
 		FA6AF933204D5224008D087E /* VertextShader.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; name = VertextShader.vert; path = "../../../OpenGL学习/VertextShader.vert"; sourceTree = "<group>"; };
-		FA6AF935204D6EDC008D087E /* FragmentShader.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = FragmentShader.frag; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -73,6 +76,8 @@
 			isa = PBXGroup;
 			children = (
 				D8E9B2D6200D04AE00BA362E /* main.cpp */,
+				FA29E4D7204E77880091374C /* ShaderProgram.hpp */,
+				FA29E4D6204E77880091374C /* ShaderProgram.cpp */,
 				FA5D8336201C5F8F009059B5 /* VertexShader.hpp */,
 				FA5D8335201C5F8F009059B5 /* VertexShader.cpp */,
 				FA31E2EB204CEFB000AF0567 /* FragmentShader.hpp */,
@@ -95,7 +100,7 @@
 			isa = PBXGroup;
 			children = (
 				FA6AF933204D5224008D087E /* VertextShader.vert */,
-				FA6AF935204D6EDC008D087E /* FragmentShader.frag */,
+				FA29E4D9204E959F0091374C /* FragmentShader.frag */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -158,6 +163,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				FA5D8337201C5F8F009059B5 /* VertexShader.cpp in Sources */,
+				FA29E4D8204E77880091374C /* ShaderProgram.cpp in Sources */,
 				D8E9B2D7200D04AE00BA362E /* main.cpp in Sources */,
 				FA31E2EC204CEFB000AF0567 /* FragmentShader.cpp in Sources */,
 			);
