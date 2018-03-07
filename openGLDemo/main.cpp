@@ -57,6 +57,10 @@ void initWindowMakeVisible() {
     cout << "The GLSL version is: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << endl;
     cout << "The OpenGL version is: " << glGetString(GL_VERSION) << endl;
     
+    GLint attributeCounts;
+    glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &attributeCounts);
+    cout << "顶点着色器中能声明的顶点属性数量上限：" << attributeCounts << endl;
+    
     // 我们必须告诉OpenGL渲染窗口的尺寸大小，这样OpenGL才只能知道怎样相对于窗口大小显示数据和坐标
     // OpenGL幕后使用glViewport中定义的位置和宽高进行2D坐标的转换，将OpenGL中的位置坐标(标准化设备坐标)转换为你的屏幕坐标
     int width, height;
