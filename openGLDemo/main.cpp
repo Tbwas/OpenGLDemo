@@ -81,6 +81,17 @@ void initWindowMakeVisible() {
     GLuint *VAOs = program.setupVertextData();
     glUseProgram(shaderProgram); // 激活程序对象
     
+    // 必须先激活program才能使用uniform
+//    GLint colorLocation = glGetUniformLocation(shaderProgram, "ourColor");
+//    if (colorLocation != -1) {
+//        glUniform4f(colorLocation, 0.0, 1.0, 0.0, 0.0);
+//    }
+    
+//    GLint xLocation = glGetUniformLocation(shaderProgram, "xOffset");
+//    if (xLocation != -1) {
+//        glUniform1f(xLocation, 0.5);
+//    }
+    
     while (!glfwWindowShouldClose(window)) {
         
         // 为了避免看见上一次的渲染结果，所以在每次渲染迭代开始时清屏
@@ -88,10 +99,10 @@ void initWindowMakeVisible() {
         glClear(GL_COLOR_BUFFER_BIT); // 清空颜色缓冲区, 之后颜色变为`glClearColor()`所设置的颜色
         
         // 颜色更新
-        GLfloat time = glfwGetTime();
-        GLfloat green = (sin(time) / 2) + 0.5;
-        GLint colorLocation = glGetUniformLocation(shaderProgram, "ourColor");
-        glUniform4f(colorLocation, 0.0, green, 0.0, 1.0);
+//        GLfloat time = glfwGetTime();
+//        GLfloat green = (sin(time) / 2) + 0.5;
+//        GLint colorLocation = glGetUniformLocation(shaderProgram, "ourColor");
+//        glUniform4f(colorLocation, 0.0, green, 0.0, 1.0);
 
         // 绘制
         glBindVertexArray(VAOs[0]);

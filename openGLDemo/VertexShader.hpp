@@ -11,7 +11,10 @@
 #define VertexShader_hpp
 
 #include <stdio.h>
-#include <OpenGL/gltypes.h>
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <glfw3.h>
 
 /**
  顶点着色器主要的目的是把3D坐标转为另一种3D坐标(标准化设备坐标)，同时顶点着色器允许我们对顶点属性进行一些基本处理。
@@ -20,6 +23,9 @@
 class VertexShader {
 
 public:
+    // 构造器读取并构建顶点着色器
+//    VertexShader(const GLchar *sourceCodePath);
+    
     GLuint createVertexShader();
 };
 

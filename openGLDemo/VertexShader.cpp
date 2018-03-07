@@ -7,13 +7,51 @@
 //
 
 #include "VertexShader.hpp"
-#include <stdio.h>
-#include <iostream>
-#include <fstream>
-#include <sstream>
-#include <glfw3.h>
 
 using namespace std;
+
+/**
+VertexShader:: VertexShader(const GLchar *sourceCodePath) {
+    string vShaderString;
+    ifstream vShaderFile;
+    
+    // 保证ifstream对象可以抛出异常
+    vShaderFile.exceptions(ifstream::badbit);
+    
+    try {
+        // 使用文件流打开文件
+        vShaderFile.open(sourceCodePath);
+        
+        // 使用字符串流读取文件的缓冲内容到流中
+        stringstream vShaderStream;
+        vShaderStream << vShaderFile.rdbuf();
+        
+        // 关闭文件
+        vShaderFile.close();
+    } catch (ifstream::failure e) {
+        cout << "The vertexShader file read error" << endl;
+    }
+    
+    const GLchar *vShaderCode = vShaderString.c_str();
+    
+    // 创建着色器对象并编译
+    GLuint vertexShader(glCreateShader(GL_VERTEX_SHADER));
+    glShaderSource(vertexShader, 1, &vShaderCode, nullptr);
+    glCompileShader(vertexShader);
+    
+    // 检测是否编译成功
+    GLint success;
+    GLchar infoLog[512];
+    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
+    if (!success) {
+        glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
+        cout << "The vertexShader compile error😡" << infoLog << endl;
+    } else {
+        glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
+        cout << "The vertexShader compile success😊\nThe source code is:\n" << vShaderCode << endl;
+    }
+}
+ */
 
 GLuint VertexShader:: createVertexShader() {
     
