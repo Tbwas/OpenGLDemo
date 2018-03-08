@@ -7,8 +7,8 @@
 //
 
 #include <iostream>
-#include <glew.h>
 #include <glfw3.h>
+#include <OpenGL/gl3.h>
 #include <cmath>
 
 #include "VertexShader.hpp"
@@ -38,7 +38,7 @@ void initWindowMakeVisible() {
     if (!glfwInit()) {
         return;
     }
-    
+
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3); // 主版本3
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3); // 次版本3
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); // 核心模式

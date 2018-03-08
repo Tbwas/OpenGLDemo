@@ -7,8 +7,7 @@
 //
 
 #include "FragmentShader.hpp"
-#include <glfw3.h>
-#include <iostream>
+#include <OpenGL/gl3.h>
 #include <fstream>
 #include <sstream>
 

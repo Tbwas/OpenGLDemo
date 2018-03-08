@@ -14,7 +14,6 @@
 #define ShaderProgram_hpp
 
 #include <stdio.h>
-#include <OpenGL/gltypes.h>
 
 class ShaderProgram {
     

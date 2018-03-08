@@ -10,8 +10,6 @@
 #define DataSource_hpp
 
 #include <stdio.h>
-#include <glew.h>
-#include <glfw3.h>
 
 /**
  告诉OpenGL如何解析顶点数据

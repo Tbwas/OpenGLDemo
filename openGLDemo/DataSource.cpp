@@ -6,6 +6,7 @@
 //  Copyright © 2018年 xindong. All rights reserved.
 //
 
+#include <OpenGL/gl3.h>
 #include "DataSource.hpp"
 #include <iostream>
 #include "stb_image.h"

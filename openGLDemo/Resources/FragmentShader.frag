@@ -17,6 +17,6 @@ void main()
     // color = vec4(outPosition, 1.0);
     
     // color = texture(ourTexture1, outTexture) * vec4(outColor, 1.0);
-    color = mix(texture(ourTexture1, outTexture), texture(ourTexture2, outTexture), 0.5) * vec4(outColor, 1.0); // 0.3表示返回第一个颜色70%和第二个颜色30%的混合色
+    color = mix(texture(ourTexture1, outTexture), texture(ourTexture2, outTexture), 0.3) * vec4(outColor, 1.0); // 0.3表示返回第一个颜色70%和第二个颜色30%的混合色
 }
 

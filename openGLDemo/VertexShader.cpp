@@ -7,6 +7,7 @@
 //
 
 #include "VertexShader.hpp"
+#include <OpenGL/gl3.h>
 
 using namespace std;
 
@@ -59,7 +60,7 @@ GLuint VertexShader:: createVertexShader() {
     ifstream fileStream;
     ostringstream strStream;
     string vShaderString;
-    string vShaderPath = "/Users/momo/Desktop/OpenGL学习/VertextShader.vert";
+    string vShaderPath = "/Users/momo/Desktop/OpenGLDemo/openGLDemo/Resources/VertextShader.vert";
     
     // 保证文件流对象可以抛出异常
     fileStream.exceptions(ifstream::badbit);

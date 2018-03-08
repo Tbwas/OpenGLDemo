@@ -7,10 +7,8 @@
 //
 
 #define GLEW_STATIC // 如果不使用静态链接，就会拷贝一份库文件到应用程序目录
-#include <glew.h>
-
+#include <OpenGL/gl3.h>
 #include "ShaderProgram.hpp"
-#include <glfw3.h>
 #include <iostream>
 #include "stb_image.h"
 
@@ -53,7 +51,7 @@ GLuint* setupVertextData() {
     glEnableVertexAttribArray(0); // 启用顶点位置属性
     
     // 颜色属性
-    glVertexAttribPointer(1, 3, GL_FLOAT, GLFW_FALSE, 6 * sizeof(GLfloat), (GLfloat *)(3 * sizeof(GLfloat)));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLfloat *)(3 * sizeof(GLfloat)));
     glEnableVertexAttribArray(1); // 启动顶点颜色属性
     
 /** 第二个VAO && VBO **/
@@ -106,13 +104,6 @@ GLuint* setupVertextData() {
 GLuint ShaderProgram:: linkVertexShader(GLuint vertexShader, GLuint fragmentShader) {
     if (!vertexShader || !fragmentShader) {
         cout << "shader cann't be nil" << vertexShader << fragmentShader << endl;
-        return -1;
-    }
-    
-    glewExperimental = GL_TRUE;
-    GLenum err = glewInit();
-    if (err != GLEW_OK) {
-        cout << "glewInit error:" << err << endl;
         return -1;
     }
     
