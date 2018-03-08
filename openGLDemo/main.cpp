@@ -14,6 +14,7 @@
 #include "VertexShader.hpp"
 #include "FragmentShader.hpp"
 #include "ShaderProgram.hpp"
+#include "DataSource.hpp"
 
 using namespace std;
 
@@ -67,7 +68,8 @@ void initWindowMakeVisible() {
     glfwGetFramebufferSize(window, &width , &height);
     glViewport(0, 0, width, height); // 原点位于左下角
     
-    glfwSetKeyCallback(window, processInputEvent); // 注册按键回调
+    // 注册按键回调
+    glfwSetKeyCallback(window, processInputEvent);
     
     // 着色器创建、编译、链接、数据装配
     VertexShader vShader;
@@ -78,19 +80,21 @@ void initWindowMakeVisible() {
     
     ShaderProgram program;
     GLuint shaderProgram = program.linkVertexShader(vertexShader, fragmentShader);
-    GLuint *VAOs = program.setupVertextData();
+    if (shaderProgram == -1) {
+        glfwTerminate();
+        exit(EXIT_SUCCESS);
+    }
+    
+    DataSource dataSource;
+    GLuint *VAOs = dataSource.setupData();
     glUseProgram(shaderProgram); // 激活程序对象
     
-    // 必须先激活program才能使用uniform
-//    GLint colorLocation = glGetUniformLocation(shaderProgram, "ourColor");
-//    if (colorLocation != -1) {
-//        glUniform4f(colorLocation, 0.0, 1.0, 0.0, 0.0);
-//    }
-    
-//    GLint xLocation = glGetUniformLocation(shaderProgram, "xOffset");
-//    if (xLocation != -1) {
-//        glUniform1f(xLocation, 0.5);
-//    }
+    // 告诉OpenGL每个采样器属于哪个纹理单元
+    GLint texture1Location = glGetUniformLocation(shaderProgram, "ourTexture1");
+    glUniform1i(texture1Location, 0); // 0为纹理单元GL_TEXTURE0
+
+    GLint texture2Location = glGetUniformLocation(shaderProgram, "ourTexture2");
+    glUniform1i(texture2Location, 1); // 1为纹理单元GL_TEXTURE1
     
     while (!glfwWindowShouldClose(window)) {
         
@@ -98,7 +102,7 @@ void initWindowMakeVisible() {
         glClearColor(255.0, 255.0, 255.0, 1.0);
         glClear(GL_COLOR_BUFFER_BIT); // 清空颜色缓冲区, 之后颜色变为`glClearColor()`所设置的颜色
         
-        // 颜色更新
+        // 颜色更新, 必须先激活program才能使用uniform
 //        GLfloat time = glfwGetTime();
 //        GLfloat green = (sin(time) / 2) + 0.5;
 //        GLint colorLocation = glGetUniformLocation(shaderProgram, "ourColor");
@@ -106,13 +110,9 @@ void initWindowMakeVisible() {
 
         // 绘制
         glBindVertexArray(VAOs[0]);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0); // 最后一个参数为偏移量0
         glBindVertexArray(0);
-        
-        glBindVertexArray(VAOs[1]);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
-        glBindVertexArray(0);
-        
+
         /**
          应用程序使用单缓冲绘图时可能会存在图像闪烁的问题。 这是因为生成的图像不是一下子被绘制出来
          的，而是按照从左到右，由上而下逐像素地绘制而成的。最终图像不是在瞬间显示给用户，而是通过一步一步生成的，这会

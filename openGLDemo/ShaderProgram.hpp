@@ -19,7 +19,6 @@
 class ShaderProgram {
     
 public:
-    GLuint* setupVertextData();
     GLuint linkVertexShader(GLuint vertexShader, GLuint fragmentShader);
 };
 

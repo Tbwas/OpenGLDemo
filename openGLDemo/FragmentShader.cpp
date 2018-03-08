@@ -16,27 +16,28 @@ using namespace std;
 
 GLuint FragmentShader:: createFragmentShader() {
     
-    // 创建着色器对象
-    GLuint fragShader;
-    fragShader = glCreateShader(GL_FRAGMENT_SHADER);
+    string fShaderString;
+    string fShaderPath = "/Users/momo/Desktop/OpenGL学习/FragmentShader.frag";
+    ifstream fileStream;
+    ostringstream strStream;
     
-    // 从工程目录文件中获取源码字符串
-    string shaderString;
-    string path = "/Users/momo/Desktop/OpenGL学习/FragmentShader.frag";
+    // 保证文件流对象可以抛出异常
+    fileStream.exceptions(ifstream::badbit);
+    
     try {
-        ifstream ifile(path);
-        ostringstream buffer;
-        char charactor;
-        while (buffer && ifile.get(charactor)) {
-            buffer.put(charactor);
-        }
-        shaderString = buffer.str();
-    } catch (exception e) {
-        cout << "ERROR: file read error " << &e << endl;
+        fileStream.open(fShaderPath); // 打开文件
+        strStream << fileStream.rdbuf(); // 读取文件内容到字符串流
+        fileStream.close(); // 关闭文件
+    } catch (ifstream::failure e) {
+        cout<< "ERROR: file read error" << &e <<endl;
     }
     
-    // 编译着色器
-    const GLchar *shaderSource = shaderString.c_str();
+    fShaderString = strStream.str();
+    const GLchar *shaderSource = fShaderString.c_str();
+    
+    // 创建着色器对象并编译
+    GLuint fragShader;
+    fragShader = glCreateShader(GL_FRAGMENT_SHADER);
     glShaderSource(fragShader, 1, &shaderSource, nullptr);
     glCompileShader(fragShader);
     
@@ -50,6 +51,7 @@ GLuint FragmentShader:: createFragmentShader() {
     } else {
         glGetShaderInfoLog(fragShader, 512, nullptr, infoLog);
         cout << "The vertexShader compile error😡" << infoLog << endl;
+        exit(EXIT_SUCCESS);
     }
     
     return fragShader;

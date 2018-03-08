@@ -11,6 +11,8 @@
 		D8E9B2DF200D056400BA362E /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D8E9B2DE200D056400BA362E /* OpenGL.framework */; };
 		D8E9B2E1200D058400BA362E /* libglfw.3.2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = D8E9B2E0200D058400BA362E /* libglfw.3.2.dylib */; };
 		FA29E4D8204E77880091374C /* ShaderProgram.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FA29E4D6204E77880091374C /* ShaderProgram.cpp */; };
+		FA2C501C2050E0C2005F9BDF /* stb_image.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FA2C501B2050E0C2005F9BDF /* stb_image.cpp */; };
+		FA2C502020510F47005F9BDF /* DataSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FA2C501E20510F47005F9BDF /* DataSource.cpp */; };
 		FA31E2EC204CEFB000AF0567 /* FragmentShader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FA31E2EA204CEFB000AF0567 /* FragmentShader.cpp */; };
 		FA5D8337201C5F8F009059B5 /* VertexShader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FA5D8335201C5F8F009059B5 /* VertexShader.cpp */; };
 /* End PBXBuildFile section */
@@ -35,11 +37,17 @@
 		FA29E4D6204E77880091374C /* ShaderProgram.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ShaderProgram.cpp; sourceTree = "<group>"; };
 		FA29E4D7204E77880091374C /* ShaderProgram.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ShaderProgram.hpp; sourceTree = "<group>"; };
 		FA29E4D9204E959F0091374C /* FragmentShader.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = FragmentShader.frag; sourceTree = "<group>"; };
+		FA2C501A2050E096005F9BDF /* stb_image.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = stb_image.h; sourceTree = "<group>"; };
+		FA2C501B2050E0C2005F9BDF /* stb_image.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = stb_image.cpp; sourceTree = "<group>"; };
+		FA2C501D2050E16C005F9BDF /* container.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = container.jpg; sourceTree = "<group>"; };
+		FA2C501E20510F47005F9BDF /* DataSource.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = DataSource.cpp; sourceTree = "<group>"; };
+		FA2C501F20510F47005F9BDF /* DataSource.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = DataSource.hpp; sourceTree = "<group>"; };
+		FA2C502220513911005F9BDF /* cute.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = cute.jpg; sourceTree = "<group>"; };
+		FA2C5023205140B0005F9BDF /* VertextShader.vert */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = VertextShader.vert; sourceTree = "<group>"; };
 		FA31E2EA204CEFB000AF0567 /* FragmentShader.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = FragmentShader.cpp; sourceTree = "<group>"; };
 		FA31E2EB204CEFB000AF0567 /* FragmentShader.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = FragmentShader.hpp; sourceTree = "<group>"; };
 		FA5D8335201C5F8F009059B5 /* VertexShader.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = VertexShader.cpp; sourceTree = "<group>"; };
 		FA5D8336201C5F8F009059B5 /* VertexShader.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = VertexShader.hpp; sourceTree = "<group>"; };
-		FA6AF933204D5224008D087E /* VertextShader.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; name = VertextShader.vert; path = "../../../OpenGL学习/VertextShader.vert"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -76,6 +84,10 @@
 			isa = PBXGroup;
 			children = (
 				D8E9B2D6200D04AE00BA362E /* main.cpp */,
+				FA2C501A2050E096005F9BDF /* stb_image.h */,
+				FA2C501B2050E0C2005F9BDF /* stb_image.cpp */,
+				FA2C501F20510F47005F9BDF /* DataSource.hpp */,
+				FA2C501E20510F47005F9BDF /* DataSource.cpp */,
 				FA29E4D7204E77880091374C /* ShaderProgram.hpp */,
 				FA29E4D6204E77880091374C /* ShaderProgram.cpp */,
 				FA5D8336201C5F8F009059B5 /* VertexShader.hpp */,
@@ -99,7 +111,9 @@
 		FA6AF931204D51DC008D087E /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				FA6AF933204D5224008D087E /* VertextShader.vert */,
+				FA2C502220513911005F9BDF /* cute.jpg */,
+				FA2C501D2050E16C005F9BDF /* container.jpg */,
+				FA2C5023205140B0005F9BDF /* VertextShader.vert */,
 				FA29E4D9204E959F0091374C /* FragmentShader.frag */,
 			);
 			path = Resources;
@@ -162,8 +176,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FA2C502020510F47005F9BDF /* DataSource.cpp in Sources */,
 				FA5D8337201C5F8F009059B5 /* VertexShader.cpp in Sources */,
 				FA29E4D8204E77880091374C /* ShaderProgram.cpp in Sources */,
+				FA2C501C2050E0C2005F9BDF /* stb_image.cpp in Sources */,
 				D8E9B2D7200D04AE00BA362E /* main.cpp in Sources */,
 				FA31E2EC204CEFB000AF0567 /* FragmentShader.cpp in Sources */,
 			);

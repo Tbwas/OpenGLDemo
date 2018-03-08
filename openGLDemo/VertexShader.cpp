@@ -55,29 +55,30 @@ VertexShader:: VertexShader(const GLchar *sourceCodePath) {
 
 GLuint VertexShader:: createVertexShader() {
     
-    // 创建着色器对象
-    GLuint vertexShader;
-    vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    
     // 从文件路径获得vertex源码
-    string vertexString;
-    string vertexFilePath = "/Users/momo/Desktop/OpenGL学习/VertextShader.vert";
+    ifstream fileStream;
+    ostringstream strStream;
+    string vShaderString;
+    string vShaderPath = "/Users/momo/Desktop/OpenGL学习/VertextShader.vert";
+    
+    // 保证文件流对象可以抛出异常
+    fileStream.exceptions(ifstream::badbit);
+    
     try {
-        ifstream ifile(vertexFilePath);
-        ostringstream buffer; // 父类：ostream、stringstream
-        char charactor;
-        while (buffer && ifile.get(charactor)) {
-            buffer.put(charactor);
-        }
-        vertexString = buffer.str();
-        
-    } catch (exception e) {
+        fileStream.open(vShaderPath); // 打开文件
+        strStream << fileStream.rdbuf(); // 读取文件缓冲内容到字符串流中
+        fileStream.close(); // 关闭文件
+    } catch (ifstream::failure e) {
         cout<< "ERROR: file read error" << &e <<endl;
     }
     
-    // 编译顶点着色器
-    const GLchar *vertexShaderSource = vertexString.c_str();
-    glShaderSource(vertexShader, 1, &vertexShaderSource, NULL); // 1为源码字符串数量
+    vShaderString = strStream.str(); // 必须通过string类型变量中转
+    const GLchar *vShaderCode = vShaderString.c_str();
+
+    // 创建着色器对象并编译
+    GLuint vertexShader;
+    vertexShader = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(vertexShader, 1, &vShaderCode, NULL); // 1为源码字符串数量
     glCompileShader(vertexShader);
     
     // 检测是否编译成功
@@ -87,11 +88,11 @@ GLuint VertexShader:: createVertexShader() {
     if (!success) {
         glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
         cout << "The vertexShader compile error😡" << infoLog << endl;
+        exit(EXIT_SUCCESS);
     } else {
         glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-        cout << "The vertexShader compile success😊\nThe source code is:\n" << vertexShaderSource << endl;
+        cout << "The vertexShader compile success😊\nThe source code is:\n" << vShaderCode << endl;
     }
     
     return vertexShader;
 }
-
