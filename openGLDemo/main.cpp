@@ -20,6 +20,9 @@ using namespace std;
 
 #pragma mark - Declaration
 
+GLint textureAlphaLocation;
+GLfloat textureAlpha;
+
 void initWindowMakeVisible();
 void processInputEvent(GLFWwindow *window, int key, int scanCode, int action, int mods);
 
@@ -96,6 +99,8 @@ void initWindowMakeVisible() {
     GLint texture2Location = glGetUniformLocation(shaderProgram, "ourTexture2");
     glUniform1i(texture2Location, 1); // 1为纹理单元GL_TEXTURE1
     
+    textureAlphaLocation = glGetUniformLocation(shaderProgram, "textureAlpha");
+    
     while (!glfwWindowShouldClose(window)) {
         
         // 为了避免看见上一次的渲染结果，所以在每次渲染迭代开始时清屏
@@ -143,10 +148,29 @@ void processInputEvent(GLFWwindow *window, int key, int scanCode, int action, in
     cout<< "action is:" << action <<endl;
     cout<< "mods is:" << mods <<endl;
     
-    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_RELEASE) {
-        glfwSetWindowShouldClose(window, true); // 设置window关闭flag，注意线程安全
-        glfwTerminate();
-        exit(EXIT_SUCCESS);
+    if (glfwGetKey(window, key) == GLFW_RELEASE) {
+        switch (key) {
+            case GLFW_KEY_ESCAPE:
+                glfwSetWindowShouldClose(window, true); // 设置window关闭flag，注意线程安全
+                glfwTerminate();
+                exit(EXIT_SUCCESS);
+                break;
+            
+            case GLFW_KEY_UP:
+                textureAlpha += 0.1;
+                textureAlpha = textureAlpha > 1.0 ? 1.0 : textureAlpha;
+                glUniform1f(textureAlphaLocation, textureAlpha);
+                break;
+                
+            case GLFW_KEY_DOWN:
+                textureAlpha -= 0.1;
+                textureAlpha = textureAlpha < 0.0 ? 0.0 : textureAlpha;
+                glUniform1f(textureAlphaLocation, textureAlpha);
+                break;
+                
+            default:
+                break;
+        }
     }
 }
 
