@@ -11,12 +11,17 @@
 #include <OpenGL/gl3.h>
 #include <cmath>
 
+#include "glm/glm.hpp"
+#include "glm/gtc/type_ptr.hpp"
+#include "glm/gtc/matrix_transform.hpp"
+
 #include "VertexShader.hpp"
 #include "FragmentShader.hpp"
 #include "ShaderProgram.hpp"
 #include "DataSource.hpp"
 
 using namespace std;
+using namespace glm;
 
 #pragma mark - Declaration
 
@@ -25,6 +30,14 @@ GLfloat textureAlpha;
 
 void initWindowMakeVisible();
 void processInputEvent(GLFWwindow *window, int key, int scanCode, int action, int mods);
+
+/**
+ @param location uniform变量位置值
+ @param count 矩阵数量，即要发送多少个矩阵到shader
+ @param transpose 矩阵是否置换，即交换矩阵的行和列，一般不需要
+ @param value 真正的矩阵数据
+ */
+extern void glUniformMatrix4fv (GLint location, GLsizei count, GLboolean transpose, const GLfloat *value);
 
 #pragma mark - Main
 
@@ -48,7 +61,7 @@ void initWindowMakeVisible() {
     glfwWindowHint(GLFW_RESIZABLE, GL_FALSE); // 不允许用户调整窗口大小
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // 在mac上需要设置, 向前兼容
     
-    window = glfwCreateWindow(640, 480, "Hi, OpenGL!  I'm dongxin.", NULL, NULL);
+    window = glfwCreateWindow(640, 480, "心董儿", NULL, NULL);
     if (!window) {
         cout << "GLFW create window error" << window << endl;
         glfwTerminate();
@@ -95,11 +108,14 @@ void initWindowMakeVisible() {
     // 告诉OpenGL每个采样器属于哪个纹理单元
     GLint texture1Location = glGetUniformLocation(shaderProgram, "ourTexture1");
     glUniform1i(texture1Location, 0); // 0为纹理单元GL_TEXTURE0
-
     GLint texture2Location = glGetUniformLocation(shaderProgram, "ourTexture2");
     glUniform1i(texture2Location, 1); // 1为纹理单元GL_TEXTURE1
     
+    // 改变纹理透明度
     textureAlphaLocation = glGetUniformLocation(shaderProgram, "textureAlpha");
+    
+    // 矩阵变换
+    GLuint transformLoc = glGetUniformLocation(shaderProgram, "trans");
     
     while (!glfwWindowShouldClose(window)) {
         
@@ -107,16 +123,24 @@ void initWindowMakeVisible() {
         glClearColor(255.0, 255.0, 255.0, 1.0);
         glClear(GL_COLOR_BUFFER_BIT); // 清空颜色缓冲区, 之后颜色变为`glClearColor()`所设置的颜色
         
-        // 颜色更新, 必须先激活program才能使用uniform
-//        GLfloat time = glfwGetTime();
-//        GLfloat green = (sin(time) / 2) + 0.5;
-//        GLint colorLocation = glGetUniformLocation(shaderProgram, "ourColor");
-//        glUniform4f(colorLocation, 0.0, green, 0.0, 1.0);
-
         // 绘制
         glBindVertexArray(VAOs[0]);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0); // 最后一个参数为偏移量0
+        
+        mat4 transform(1.0f);
+        transform = translate(transform, vec3(0.5f, -0.5f, 0.0f));
+        transform = rotate(transform, (float)glfwGetTime(), vec3(0.0f, 0.0f, 1.0f));
+        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, value_ptr(transform));
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        
+        transform = mat4(1.0f);
+        transform = translate(transform, vec3(-0.5f, 0.5f, 0.0f));
+        float scaleAmount = sin(glfwGetTime());
+        transform = scale(transform, vec3(scaleAmount, scaleAmount, scaleAmount));
+        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, value_ptr(transform));
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        
         glBindVertexArray(0);
+        
 
         /**
          应用程序使用单缓冲绘图时可能会存在图像闪烁的问题。 这是因为生成的图像不是一下子被绘制出来

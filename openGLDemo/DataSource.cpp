@@ -11,9 +11,30 @@
 #include <iostream>
 #include "stb_image.h"
 
+/** 以下3个头文件可满足大多数矩阵变换运算功能 **/
+#include "glm/glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
+#include "glm/gtc/type_ptr.hpp"
+
 using namespace std;
+using namespace glm;
+
+static void MatrixTransform() {
+    glm::vec4 vec(1.0, 0.0, 0.0, 1.0); // 定义向量vec
+    glm::mat4 trans; // 定义一个4*4的单位矩阵
+
+    // 通过单位矩阵和位移向量来创建一个变换矩阵
+    // 即Tx = 2.0, Ty = 3.0, Tz = 4.0
+    trans = glm::translate(trans, glm::vec3(2.0, 3.0, 3.0));
+
+    // 变换矩阵和向量相乘即可获得最终结果
+    vec = trans * vec;
+    cout << vec.x << vec.y << vec.z << endl;
+}
 
 GLuint* DataSource:: setupData() {
+    
+    MatrixTransform();
     
     // @Note 书写数据时一定要注意纹理坐标系和OpenGL坐标系的映射关系
     GLfloat datas[] = {
@@ -23,7 +44,7 @@ GLuint* DataSource:: setupData() {
         0.5, -0.5, 0.0,  1.0, 1.0, 0.0,  1.0, 0.0,
         -0.5, -0.5, 0.0, 1.0, 0.0, 0.0,  0.0, 0.0
     };
-
+    
     // 绘制矩形要借助EBO，这样才能避免额外开销
     GLuint indexs[] = {
         0, 1, 2, // 第一个三角形
