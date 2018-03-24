@@ -34,7 +34,7 @@ static void MatrixTransform() {
 
 GLuint* DataSource:: setupData() {
     
-    MatrixTransform();
+//    MatrixTransform();
     
     // @Note 书写数据时一定要注意纹理坐标系和OpenGL坐标系的映射关系
     GLfloat datas[] = {

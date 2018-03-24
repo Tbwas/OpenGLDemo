@@ -105,7 +105,7 @@ void initWindowMakeVisible() {
     GLuint *VAOs = dataSource.setupData();
     glUseProgram(shaderProgram); // 激活程序对象
     
-    // 告诉OpenGL每个采样器属于哪个纹理单元
+    // 告诉OpenGL每个采样器对应哪个纹理单元，然后方可获取纹理对象
     GLint texture1Location = glGetUniformLocation(shaderProgram, "ourTexture1");
     glUniform1i(texture1Location, 0); // 0为纹理单元GL_TEXTURE0
     GLint texture2Location = glGetUniformLocation(shaderProgram, "ourTexture2");
@@ -126,18 +126,18 @@ void initWindowMakeVisible() {
         // 绘制
         glBindVertexArray(VAOs[0]);
         
-        mat4 transform(1.0f);
+        mat4 transform(1.0f); // 声明时一定要用"1.0f"这个方式, 且每次迭代的时候都要创建矩阵.
         transform = translate(transform, vec3(0.5f, -0.5f, 0.0f));
         transform = rotate(transform, (float)glfwGetTime(), vec3(0.0f, 0.0f, 1.0f));
         glUniformMatrix4fv(transformLoc, 1, GL_FALSE, value_ptr(transform));
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0); // draw之后，程序开始执行，着色器开始工作，两个三角形组成的矩形一共6个顶点。
         
         transform = mat4(1.0f);
         transform = translate(transform, vec3(-0.5f, 0.5f, 0.0f));
         float scaleAmount = sin(glfwGetTime());
         transform = scale(transform, vec3(scaleAmount, scaleAmount, scaleAmount));
         glUniformMatrix4fv(transformLoc, 1, GL_FALSE, value_ptr(transform));
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0); // 通过DrawElement再次绘制一个矩形
         
         glBindVertexArray(0);
         
