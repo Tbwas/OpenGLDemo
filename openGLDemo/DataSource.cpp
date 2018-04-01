@@ -19,7 +19,7 @@
 using namespace std;
 using namespace glm;
 
-static void MatrixTransform() {
+static void __unused MatrixTransform() {
     glm::vec4 vec(1.0, 0.0, 0.0, 1.0); // 定义向量vec
     glm::mat4 trans; // 定义一个4*4的单位矩阵
 
@@ -37,19 +37,63 @@ GLuint* DataSource:: setupData() {
 //    MatrixTransform();
     
     // @Note 书写数据时一定要注意纹理坐标系和OpenGL坐标系的映射关系
-    GLfloat datas[] = {
-        /*位置属性*/       /*颜色属性*/    /*纹理属性*/
-        -0.5, 0.5, 0.0,  0.0, 1.0, 1.0,  0.0, 1.0,
-        0.5, 0.5, 0.0,   1.0, 0.0, 1.0,  1.0, 1.0,
-        0.5, -0.5, 0.0,  1.0, 1.0, 0.0,  1.0, 0.0,
-        -0.5, -0.5, 0.0, 1.0, 0.0, 0.0,  0.0, 0.0
+//    GLfloat datas[] = {
+//        /*位置属性*/       /*颜色属性*/    /*纹理属性*/
+//        -0.5, 0.5, 0.0,  0.0, 1.0, 1.0,  0.0, 1.0,
+//        0.5, 0.5, 0.0,   1.0, 0.0, 1.0,  1.0, 1.0,
+//        0.5, -0.5, 0.0,  1.0, 1.0, 0.0,  1.0, 0.0,
+//        -0.5, -0.5, 0.0, 1.0, 0.0, 0.0,  0.0, 0.0
+//    };
+    
+    float datas[] = {
+        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+        0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+        0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+        0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+        
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+        0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+        0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+        0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+        
+        -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+        -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+        
+        0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+        0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+        0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+        0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+        0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+        0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+        
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+        0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
+        0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+        0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+        
+        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+        0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+        0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+        0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
     };
     
     // 绘制矩形要借助EBO，这样才能避免额外开销
-    GLuint indexs[] = {
-        0, 1, 2, // 第一个三角形
-        2, 3, 0  // 第二个三角形
-    };
+//    GLuint indexs[] = {
+//        0, 1, 2, // 第一个三角形
+//        2, 3, 0  // 第二个三角形
+//    };
     
     // VAO
     static GLuint VAOs[1];
@@ -63,11 +107,18 @@ GLuint* DataSource:: setupData() {
     glBufferData(GL_ARRAY_BUFFER, sizeof(datas), datas, GL_STATIC_DRAW); // 把数据拷贝到缓冲中
     
     // EBO
-    GLuint EBOs[1];
-    glGenBuffers(1, EBOs);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBOs[0]);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indexs), indexs, GL_STATIC_DRAW);
+//    GLuint EBOs[1];
+//    glGenBuffers(1, EBOs);
+//    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBOs[0]);
+//    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indexs), indexs, GL_STATIC_DRAW);
     
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLfloat *)0);
+    glEnableVertexAttribArray(0);
+    
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLfloat *)(3 * sizeof(GLfloat)));
+    glEnableVertexAttribArray(2);
+    
+    /**
     // 位置属性数据解析方式
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLfloat *)0);
     glEnableVertexAttribArray(0);
@@ -79,6 +130,7 @@ GLuint* DataSource:: setupData() {
     // 纹理属性数据解析方式
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLfloat *)(6 * sizeof(GLfloat)));
     glEnableVertexAttribArray(2);
+     */
 
     // 纹理对象
     GLuint ourTexture1;
@@ -104,7 +156,6 @@ GLuint* DataSource:: setupData() {
         exit(EXIT_SUCCESS);
     }
     stbi_image_free(imageData); // 释放图片数据
-    
     
     // 第二个纹理对象
     GLuint ourTexture2;
@@ -132,6 +183,6 @@ GLuint* DataSource:: setupData() {
     // 解绑AVO
     glBindVertexArray(0);
     glDeleteBuffers(1, VBOs);
-    glDeleteBuffers(1, EBOs);
+//    glDeleteBuffers(1, EBOs);
     return VAOs;
 }

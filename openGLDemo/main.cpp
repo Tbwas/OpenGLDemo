@@ -28,8 +28,20 @@ using namespace glm;
 GLint textureAlphaLocation;
 GLfloat textureAlpha;
 
+vec3 camPosition = vec3(0.0f, 0.0, 3.0f);    // 摄像机位置向量
+vec3 camDirection = vec3(0.0f, 0.0f, -1.0f); // 摄像机方向向量
+vec3 camUp = vec3(0.0f, 1.0f,  0.0f); // 向上向量
+GLfloat deltaTime = 0.0f; // 当前帧与上一帧绘制的时间差，用来平衡不同硬件间的移动速度
+GLfloat lastTime = 0.0f;
+
+GLfloat lastX = 320.0f; // 设置鼠标初始位置
+GLfloat lastY = 240.0f; // 设置鼠标初始位置
+GLfloat pitchAngle = 0.0f; // 俯仰角
+GLfloat yawAngle = 0.0f; // 偏航角
+
 void initWindowMakeVisible();
 void processInputEvent(GLFWwindow *window, int key, int scanCode, int action, int mods);
+void mouseCallback(GLFWwindow *window, double xPos, double yPos);
 
 /**
  @param location uniform变量位置值
@@ -87,6 +99,12 @@ void initWindowMakeVisible() {
     // 注册按键回调
     glfwSetKeyCallback(window, processInputEvent);
     
+    // 不显示光标并且捕捉它
+//    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    
+    // 监听鼠标移动事件
+    glfwSetCursorPosCallback(window, mouseCallback);
+    
     // 着色器创建、编译、链接、数据装配
     VertexShader vShader;
     GLuint vertexShader = vShader.createVertexShader();
@@ -117,27 +135,76 @@ void initWindowMakeVisible() {
     // 矩阵变换
     GLuint transformLoc = glGetUniformLocation(shaderProgram, "trans");
     
+    // 模型矩阵
+    GLuint modelLocation = glGetUniformLocation(shaderProgram, "model");
+    
+    // 视觉矩阵
+    GLuint viewLocation = glGetUniformLocation(shaderProgram, "view");
+    
+    // 投影矩阵
+    GLuint projectionLocation = glGetUniformLocation(shaderProgram, "projection");
+    
+    // 启用深度测试
+    glEnable(GL_DEPTH_TEST);
+    
     while (!glfwWindowShouldClose(window)) {
         
         // 为了避免看见上一次的渲染结果，所以在每次渲染迭代开始时清屏
         glClearColor(255.0, 255.0, 255.0, 1.0);
-        glClear(GL_COLOR_BUFFER_BIT); // 清空颜色缓冲区, 之后颜色变为`glClearColor()`所设置的颜色
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // 清空颜色缓冲区, 之后颜色变为`glClearColor()`所设置的颜色
         
-        // 绘制
+        // 绑定VAO之后开始绘制操作
         glBindVertexArray(VAOs[0]);
         
-        mat4 transform(1.0f); // 声明时一定要用"1.0f"这个方式, 且每次迭代的时候都要创建矩阵.
-        transform = translate(transform, vec3(0.5f, -0.5f, 0.0f));
-        transform = rotate(transform, (float)glfwGetTime(), vec3(0.0f, 0.0f, 1.0f));
-        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, value_ptr(transform));
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0); // draw之后，程序开始执行，着色器开始工作，两个三角形组成的矩形一共6个顶点。
+        // 创建一个模型矩阵 - 处理旋转
+//        mat4 model(1.0f);
+//        model = rotate(model, radians(-55.0f), vec3(1.0f, 0.0f, 0.0f));
+//        glUniformMatrix4fv(modelLocation, 1, GL_FALSE, value_ptr(model));
         
-        transform = mat4(1.0f);
-        transform = translate(transform, vec3(-0.5f, 0.5f, 0.0f));
-        float scaleAmount = sin(glfwGetTime());
-        transform = scale(transform, vec3(scaleAmount, scaleAmount, scaleAmount));
-        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, value_ptr(transform));
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0); // 通过DrawElement再次绘制一个矩形
+        // 创建一个视觉矩阵 - 处理平移
+//        mat4 view(1.0f);
+//        view = translate(view, vec3(2.0f, 0.0f, 0.0f));
+//        glUniformMatrix4fv(viewLocation, 1, GL_FALSE, value_ptr(view));
+        
+        GLfloat currentTime = glfwGetTime();
+        deltaTime = currentTime - lastTime;
+        lastTime = currentTime;
+        
+        // 创建一个投影矩阵 - @!!!: Note 需要通过该矩阵将输入坐标转为3D标准化设备坐标.
+        mat4 projection(1.0f);
+        projection = perspective(radians(45.0f), (float)width / height, 0.1f, 100.0f); // 投影矩阵参数通常这样配置
+        glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, value_ptr(projection));
+        
+        // 创建一个LookAt矩阵 (摄像机位置、目标位置、向上的向量)
+        mat4 look(1.0f);
+        float radius = 10.0f;
+        float camX = sin(glfwGetTime()) * radius;
+        float camZ = cos(glfwGetTime()) * radius;
+//        look = lookAt(vec3(camX, 0.0f, camZ), vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f));
+        look = lookAt(camPosition, vec3(0.0f, 0.0f, 2.0f), camUp);
+        
+        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, value_ptr(look));
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+        
+        
+//        mat4 model(1.0f);
+//        float rad = glfwGetTime() * 10;
+//        model = rotate(model, radians(rad), vec3(1.0f, 0.0f, 1.0f));
+//        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, value_ptr(model));
+//        glDrawArrays(GL_TRIANGLES, 0, 36);
+        
+//        mat4 transform(1.0f); // 声明时一定要用"1.0f"这个方式, 且每次迭代的时候都要创建矩阵.
+//        transform = translate(transform, vec3(0.5f, -0.5f, 0.0f));
+//        transform = rotate(transform, (float)glfwGetTime(), vec3(0.0f, 0.0f, 1.0f));
+//        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, value_ptr(transform));
+//        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0); // draw之后，程序开始执行，着色器开始工作，两个三角形组成的矩形一共6个顶点。
+
+//        transform = mat4(1.0f);
+//        transform = translate(transform, vec3(-0.5f, 0.5f, 0.0f));
+//        float scaleAmount = sin(glfwGetTime());
+//        transform = scale(transform, vec3(scaleAmount, scaleAmount, scaleAmount));
+//        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, value_ptr(transform));
+//        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0); // 通过DrawElement再次绘制一个矩形
         
         glBindVertexArray(0);
         
@@ -172,7 +239,9 @@ void processInputEvent(GLFWwindow *window, int key, int scanCode, int action, in
     cout<< "action is:" << action <<endl;
     cout<< "mods is:" << mods <<endl;
     
-    if (glfwGetKey(window, key) == GLFW_RELEASE) {
+    float camSpeed = 2.5f * deltaTime;
+    
+    if (glfwGetKey(window, key) == GLFW_PRESS) {
         switch (key) {
             case GLFW_KEY_ESCAPE:
                 glfwSetWindowShouldClose(window, true); // 设置window关闭flag，注意线程安全
@@ -192,9 +261,60 @@ void processInputEvent(GLFWwindow *window, int key, int scanCode, int action, in
                 glUniform1f(textureAlphaLocation, textureAlpha);
                 break;
                 
+            case GLFW_KEY_W:
+                camPosition -= camSpeed * camDirection;
+                break;
+                
+            case GLFW_KEY_S:
+                camPosition += camSpeed * camDirection;
+                break;
+                
+            case GLFW_KEY_A:
+                camPosition -= cross(camDirection, camUp) * camSpeed;
+                break;
+                
+            case GLFW_KEY_D:
+                camPosition += cross(camDirection, camUp) * camSpeed;
+                break;
+                
             default:
                 break;
         }
     }
+}
+
+
+/**
+ 鼠标移动回调
+
+ @param window 窗口
+ @param xPos x位置
+ @param yPos y位置
+ */
+void mouseCallback(GLFWwindow *window, double xPos, double yPos) {
+    cout << "鼠标在移动, x: " << xPos << " y: " << yPos << endl;
+    
+    float xOffset = xPos - lastX;
+    float yOffset = lastY - yPos; // 这里是相反的，因为鼠标向下移动yPos是增大的，而我们希望是鼠标向上移动增大的
+    lastX = xPos;
+    lastY = yPos;
+    
+    float sensitivity = 0.5;
+    xOffset *= sensitivity;
+    yOffset *= sensitivity;
+    
+    pitchAngle += yOffset;
+    yawAngle += xOffset;
+    
+    // 做个大小限制
+    pitchAngle = pitchAngle > 89.0f ? 89.0f : pitchAngle < -89.0f ? -89.0 : pitchAngle;
+    
+    // 通过俯仰角和偏航角来计算方向向量
+    vec3 direction(1.0f);
+    direction.x = cos(radians(pitchAngle)) * cos(radians(yawAngle));
+    direction.y = sin(radians(pitchAngle));
+    direction.z = cos(radians(pitchAngle)) * sin(radians(yawAngle));
+    camDirection = direction;
+    
 }
 
