@@ -101,16 +101,19 @@ GLuint* setupVertextData() {
     return VAOs;
 }
 
-GLuint ShaderProgram:: linkVertexShader(GLuint vertexShader, GLuint fragmentShader) {
-    if (!vertexShader || !fragmentShader) {
-        cout << "shader cann't be nil" << vertexShader << fragmentShader << endl;
+GLuint ShaderProgram:: linkShaders(GLuint *shaderArray) {
+    if (!shaderArray) {
+        cout << "shader cann't be nil" << endl;
         return -1;
     }
     
     // 把着色器附加到程序上，然后链接它们
     GLuint program = glCreateProgram();
-    glAttachShader(program, vertexShader);
-    glAttachShader(program, fragmentShader);
+    int shaderCount = sizeof(shaderArray) / sizeof(GLuint);
+    
+    for (int i = 0; i < shaderCount; i++) {
+        glAttachShader(program, shaderArray[i]);
+    }
     glLinkProgram(program);
     
     // 链接错误检测
@@ -126,8 +129,10 @@ GLuint ShaderProgram:: linkVertexShader(GLuint vertexShader, GLuint fragmentShad
     }
     
     // 删除着色器对象，以后不再需要了
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
+    for (int i = 0; i < shaderCount; i++) {
+        glDeleteShader(shaderArray[i]);
+    }
     
     return program;
 }
+

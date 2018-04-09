@@ -18,7 +18,7 @@
 class FragmentShader {
     
 public:
-    uint32_t createFragmentShader();
+    uint32_t createFragmentShader(std::string path);
 };
 
 #endif

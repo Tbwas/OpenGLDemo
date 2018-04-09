@@ -18,7 +18,7 @@
 class ShaderProgram {
     
 public:
-    GLuint linkVertexShader(GLuint vertexShader, GLuint fragmentShader);
+    GLuint linkShaders(GLuint *shaderArray);
 };
 
 #endif /* ShaderProgram_hpp */

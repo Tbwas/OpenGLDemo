@@ -13,10 +13,10 @@
 
 using namespace std;
 
-GLuint FragmentShader:: createFragmentShader() {
+GLuint FragmentShader:: createFragmentShader(std::string path) {
     
     string fShaderString;
-    string fShaderPath = "/Users/momo/Desktop/OpenGL学习/FragmentShader.frag";
+    string fShaderPath = path;
     ifstream fileStream;
     ostringstream strStream;
     
@@ -49,7 +49,7 @@ GLuint FragmentShader:: createFragmentShader() {
         cout << "The fragmentShader compile success😊\nThe source code is:\n" << shaderSource << endl;
     } else {
         glGetShaderInfoLog(fragShader, 512, nullptr, infoLog);
-        cout << "The vertexShader compile error😡" << infoLog << endl;
+        cout << "The fragmentShader compile error😡" << infoLog << endl;
         exit(EXIT_SUCCESS);
     }
     

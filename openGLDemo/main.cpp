@@ -44,6 +44,15 @@ void processInputEvent(GLFWwindow *window, int key, int scanCode, int action, in
 void mouseCallback(GLFWwindow *window, double xPos, double yPos);
 
 /**
+ 应用程序使用单缓冲绘图时可能会存在图像闪烁的问题。 这是因为生成的图像不是一下子被绘制出来
+ 的，而是按照从左到右，由上而下逐像素地绘制而成的。最终图像不是在瞬间显示给用户，而是通过一步一步生成的，这会
+ 导致渲染的结果很不真实。为了规避这些问题，我们应用双缓冲渲染窗口应用程序。前缓冲保存着最终输出的图像，它会在
+ 屏幕上显示；而所有的的渲染指令都会在后缓冲上绘制。当所有的渲染指令执行完毕后，我们交换(Swap)前缓冲和后缓
+ 冲，这样图像就立即呈显出来，之前提到的不真实感就消除了。
+ */
+GLFWAPI void glfwSwapBuffers(GLFWwindow* window);
+
+/**
  @param location uniform变量位置值
  @param count 矩阵数量，即要发送多少个矩阵到shader
  @param transpose 矩阵是否置换，即交换矩阵的行和列，一般不需要
@@ -110,18 +119,28 @@ void initWindowMakeVisible() {
     GLuint vertexShader = vShader.createVertexShader();
     
     FragmentShader fShader;
-    GLuint fragmentShader = fShader.createFragmentShader();
+    GLuint fragmentShader = fShader.createFragmentShader("/Users/momo/Desktop/OpenGL学习/FragmentShader.frag");
+    GLuint allShaders[] = {vertexShader, fragmentShader};
     
     ShaderProgram program;
-    GLuint shaderProgram = program.linkVertexShader(vertexShader, fragmentShader);
+    GLuint shaderProgram = program.linkShaders(allShaders);
     if (shaderProgram == -1) {
+        glfwTerminate();
+        exit(EXIT_SUCCESS);
+    }
+    
+    // 单独创建一个光源着色器
+    GLuint lightShader = fShader.createFragmentShader("/Users/momo/Desktop/OpenGL学习/lightShader.frag");
+    GLuint lightShaders[] = {vertexShader, lightShader};
+    
+    GLuint lightProgram = program.linkShaders(lightShaders);
+    if (lightProgram == -1) {
         glfwTerminate();
         exit(EXIT_SUCCESS);
     }
     
     DataSource dataSource;
     GLuint *VAOs = dataSource.setupData();
-    glUseProgram(shaderProgram); // 激活程序对象
     
     // 告诉OpenGL每个采样器对应哪个纹理单元，然后方可获取纹理对象
     GLint texture1Location = glGetUniformLocation(shaderProgram, "ourTexture1");
@@ -135,14 +154,15 @@ void initWindowMakeVisible() {
     // 矩阵变换
     GLuint transformLoc = glGetUniformLocation(shaderProgram, "trans");
     
-    // 模型矩阵
-    GLuint modelLocation = glGetUniformLocation(shaderProgram, "model");
-    
-    // 视觉矩阵
-    GLuint viewLocation = glGetUniformLocation(shaderProgram, "view");
-    
     // 投影矩阵
     GLuint projectionLocation = glGetUniformLocation(shaderProgram, "projection");
+    
+    // 创建一个投影矩阵 - @!!!: Note 需要通过该矩阵将输入坐标转为3D标准化设备坐标.
+    mat4 projection(1.0f);
+    projection = perspective(radians(45.0f), (float)width / height, 0.1f, 100.0f); // 投影矩阵参数通常这样配置
+    
+    // 光源颜色
+    GLuint lightColorLocation = glGetUniformLocation(shaderProgram, "lightColor");
     
     // 启用深度测试
     glEnable(GL_DEPTH_TEST);
@@ -150,74 +170,48 @@ void initWindowMakeVisible() {
     while (!glfwWindowShouldClose(window)) {
         
         // 为了避免看见上一次的渲染结果，所以在每次渲染迭代开始时清屏
-        glClearColor(255.0, 255.0, 255.0, 1.0);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // 清空颜色缓冲区, 之后颜色变为`glClearColor()`所设置的颜色
+        glClearColor(0.1, 0.1, 0.1, 1.0);
         
-        // 绑定VAO之后开始绘制操作
+        // 清空颜色缓冲区之后颜色变为`glClearColor()`所设置的颜色
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        
+        
+        glUseProgram(shaderProgram);
         glBindVertexArray(VAOs[0]);
-        
-        // 创建一个模型矩阵 - 处理旋转
-//        mat4 model(1.0f);
-//        model = rotate(model, radians(-55.0f), vec3(1.0f, 0.0f, 0.0f));
-//        glUniformMatrix4fv(modelLocation, 1, GL_FALSE, value_ptr(model));
-        
-        // 创建一个视觉矩阵 - 处理平移
-//        mat4 view(1.0f);
-//        view = translate(view, vec3(2.0f, 0.0f, 0.0f));
-//        glUniformMatrix4fv(viewLocation, 1, GL_FALSE, value_ptr(view));
         
         GLfloat currentTime = glfwGetTime();
         deltaTime = currentTime - lastTime;
         lastTime = currentTime;
-        
-        // 创建一个投影矩阵 - @!!!: Note 需要通过该矩阵将输入坐标转为3D标准化设备坐标.
-        mat4 projection(1.0f);
-        projection = perspective(radians(45.0f), (float)width / height, 0.1f, 100.0f); // 投影矩阵参数通常这样配置
-        glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, value_ptr(projection));
-        
+
         // 创建一个LookAt矩阵 (摄像机位置、目标位置、向上的向量)
         mat4 look(1.0f);
         float radius = 10.0f;
         float camX = sin(glfwGetTime()) * radius;
         float camZ = cos(glfwGetTime()) * radius;
-//        look = lookAt(vec3(camX, 0.0f, camZ), vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f));
-        look = lookAt(camPosition, vec3(0.0f, 0.0f, 2.0f), camUp);
-        
+        look = lookAt(vec3(camX, 0.0f, camZ), vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f));
         glUniformMatrix4fv(transformLoc, 1, GL_FALSE, value_ptr(look));
-        glDrawArrays(GL_TRIANGLES, 0, 36);
-        
-        
-//        mat4 model(1.0f);
-//        float rad = glfwGetTime() * 10;
-//        model = rotate(model, radians(rad), vec3(1.0f, 0.0f, 1.0f));
-//        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, value_ptr(model));
-//        glDrawArrays(GL_TRIANGLES, 0, 36);
-        
-//        mat4 transform(1.0f); // 声明时一定要用"1.0f"这个方式, 且每次迭代的时候都要创建矩阵.
-//        transform = translate(transform, vec3(0.5f, -0.5f, 0.0f));
-//        transform = rotate(transform, (float)glfwGetTime(), vec3(0.0f, 0.0f, 1.0f));
-//        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, value_ptr(transform));
-//        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0); // draw之后，程序开始执行，着色器开始工作，两个三角形组成的矩形一共6个顶点。
+        glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, value_ptr(projection));
 
-//        transform = mat4(1.0f);
-//        transform = translate(transform, vec3(-0.5f, 0.5f, 0.0f));
-//        float scaleAmount = sin(glfwGetTime());
-//        transform = scale(transform, vec3(scaleAmount, scaleAmount, scaleAmount));
-//        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, value_ptr(transform));
-//        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0); // 通过DrawElement再次绘制一个矩形
-        
+        glDrawArrays(GL_TRIANGLES, 0, 36);
         glBindVertexArray(0);
         
-
-        /**
-         应用程序使用单缓冲绘图时可能会存在图像闪烁的问题。 这是因为生成的图像不是一下子被绘制出来
-         的，而是按照从左到右，由上而下逐像素地绘制而成的。最终图像不是在瞬间显示给用户，而是通过一步一步生成的，这会
-         导致渲染的结果很不真实。为了规避这些问题，我们应用双缓冲渲染窗口应用程序。前缓冲保存着最终输出的图像，它会在
-         屏幕上显示；而所有的的渲染指令都会在后缓冲上绘制。当所有的渲染指令执行完毕后，我们交换(Swap)前缓冲和后缓
-         冲，这样图像就立即呈显出来，之前提到的不真实感就消除了。
-         */
+        // 绘制光源立方体
+        glUseProgram(lightProgram);
+        glBindVertexArray(VAOs[1]);
+        
+        mat4 modelMatrix(1.0f); // 模型矩阵
+        modelMatrix = translate(modelMatrix, vec3(1.0f, 1.0f, -3.0f)); // 立方体默认局部坐标空间，即(0.0, 0.0, 0.0)，是看不到的，只有将立方体沿Z轴负方向移动一定的距离，才能显示出来，之后再根据需要旋转或者缩放
+        modelMatrix = scale(modelMatrix, vec3(0.2f, 0.2f, 0.2f));
+        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, value_ptr(modelMatrix));
+        glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, value_ptr(projection));
+        glUniform3f(lightColorLocation, 1.0, 1.0, 1.0);
+        
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+        glBindVertexArray(0);
+        
         glfwSwapBuffers(window); // 颜色缓冲区存储着GLFW窗口每一个像素颜色
         glfwPollEvents(); // 监听事件
+        
     }
     glDeleteVertexArrays(2, VAOs); // 删除VAO
     glfwTerminate();
