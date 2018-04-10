@@ -65,28 +65,73 @@ GLuint* DataSource:: setupData() {
         -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
         -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
     };
+    
+    // 该立方体每个面都有一个法线向量数据（垂直于该表面）
+    float vertices[] = {
+        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+        0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+        0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+        0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+        
+        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+        0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+        0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+        0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,
+        
+        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+        -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
+        -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
+        
+        0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+        0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+        0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+        0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
+        0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+        0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+        
+        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+        0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+        0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+        0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
+        
+        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+        0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
+        0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+        0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
+    };
 
     
     // VAO
     static GLuint VAOs[2];
-    glGenVertexArrays(2, VAOs); // 返回n个当前未使用的顶点数组对象名称，并保存到VAOs数组中，这n个名称是无符号整型数据，但不一定是连续的数据。此时这些名称仅仅只是名字而已，还不是真正的对象，只有这些名称首次绑定到OpenGL上下文中的目标上之后，它所对应的缓存对象才会被真正的创建出来。
+    glGenVertexArrays(2, VAOs);
     glBindVertexArray(VAOs[0]);
-    
     
     // VBO
     GLuint VBOs[2];
     glGenBuffers(2, VBOs); // 返回n个当前未使用的缓存对象名称（类似C语言中的指针变量），并保存到VBOs数组中，这n个名称是无符号整型数据，但不一定是连续的数据。此时这些名称仅仅只是名字而已，还不是真正的缓存对象，只有这些名称首次绑定到OpenGL上下文中的目标上之后，它所对应的缓存对象才会被真正的创建出来。
     glBindBuffer(GL_ARRAY_BUFFER, VBOs[0]); // 将缓存对象名称绑定到目标`GL_ARRAY_BUFFER`上，如果是第一次绑定，则会创建一个与它对应的缓存对象。
-    glBufferData(GL_ARRAY_BUFFER, sizeof(datas), datas, GL_STATIC_DRAW); // 把数据传输到缓存对象中
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW); // 把数据传输到缓存对象中
     
     // 位置属性数据解析方式
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLfloat *)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (void *)0);
     glEnableVertexAttribArray(0);
     
-    // 纹理属性数据解析方式
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLfloat *)(3 * sizeof(GLfloat)));
-    glEnableVertexAttribArray(2);
-
+    // 法向量属性指针
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (void *)(3 * sizeof(GLfloat)));
+    glEnableVertexAttribArray(1);
+    
+/*------------------------------^_^---华丽的分割线---^_^-------------------------------------------------*/
     
     // 纹理
     GLuint ourTexture1[2]; // 可以为一个数组
@@ -97,6 +142,10 @@ GLuint* DataSource:: setupData() {
     
     // 将纹理对象ourTexture1绑定到纹理单元0上，并告诉OpenGL这个纹理对象是一个2D纹理
     glBindTexture(GL_TEXTURE_2D, ourTexture1[0]);
+    
+    // 纹理属性数据解析方式
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLfloat *)(3 * sizeof(GLfloat)));
+    glEnableVertexAttribArray(2);
     
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE); // s轴环绕方式
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE); // t轴环绕方式
@@ -122,13 +171,16 @@ GLuint* DataSource:: setupData() {
     // 创建光源VAO
     GLuint lightVAO = VAOs[1]; // 使用先前生成的名字
     glBindVertexArray(lightVAO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBOs[0]); // 复用VBO并绑定到光源VAO上
+    
+    glBindBuffer(GL_ARRAY_BUFFER, VBOs[1]);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(datas), datas, GL_STATIC_DRAW); // 把数据传输到缓存对象中
+    
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLfloat *)0);
     glEnableVertexAttribArray(0);
     
     // 解绑AVO
     glBindVertexArray(0);
-    glDeleteBuffers(1, VBOs);
+    glDeleteBuffers(2, VBOs);
     
     return VAOs;
 }

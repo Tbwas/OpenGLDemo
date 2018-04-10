@@ -104,7 +104,7 @@ void initWindowMakeVisible() {
     int width, height;
     glfwGetFramebufferSize(window, &width , &height);
     glViewport(0, 0, width, height); // 原点位于左下角
-    
+
     // 注册按键回调
     glfwSetKeyCallback(window, processInputEvent);
     
@@ -114,55 +114,78 @@ void initWindowMakeVisible() {
     // 监听鼠标移动事件
     glfwSetCursorPosCallback(window, mouseCallback);
     
-    // 着色器创建、编译、链接、数据装配
+    
+/*------------------------------^_^---华丽的分割线---^_^-------------------------------------------------*/
+
+    
+    // 顶点着色器
     VertexShader vShader;
     GLuint vertexShader = vShader.createVertexShader();
     
+    // 片元着色器
     FragmentShader fShader;
-    GLuint fragmentShader = fShader.createFragmentShader("/Users/momo/Desktop/OpenGL学习/FragmentShader.frag");
-    GLuint allShaders[] = {vertexShader, fragmentShader};
     
+    GLuint fragmentShader0 = fShader.createFragmentShader("/Users/momo/Desktop/OpenGL学习/FragmentShader.frag");
+    GLuint allShaders0[] = {vertexShader, fragmentShader0};
+    
+    GLuint fragmentShader1 = fShader.createFragmentShader("/Users/momo/Desktop/OpenGL学习/lightShader.frag");
+    GLuint allShaders1[] = {vertexShader, fragmentShader1};
+    
+    // 着色器程序对象
     ShaderProgram program;
-    GLuint shaderProgram = program.linkShaders(allShaders);
-    if (shaderProgram == -1) {
+    
+    GLuint shaderProgram0 = program.linkShaders(allShaders0);
+    if (shaderProgram0 == -1) {
         glfwTerminate();
         exit(EXIT_SUCCESS);
     }
     
-    // 单独创建一个光源着色器
-    GLuint lightShader = fShader.createFragmentShader("/Users/momo/Desktop/OpenGL学习/lightShader.frag");
-    GLuint lightShaders[] = {vertexShader, lightShader};
-    
-    GLuint lightProgram = program.linkShaders(lightShaders);
-    if (lightProgram == -1) {
+    GLuint shaderProgram1 = program.linkShaders(allShaders1);
+    if (shaderProgram1 == -1) {
         glfwTerminate();
         exit(EXIT_SUCCESS);
     }
     
+    // 数据装配
     DataSource dataSource;
     GLuint *VAOs = dataSource.setupData();
     
+    
+/*------------------------------^_^---华丽的分割线---^_^-------------------------------------------------*/
+    
+    
     // 告诉OpenGL每个采样器对应哪个纹理单元，然后方可获取纹理对象
-    GLint texture1Location = glGetUniformLocation(shaderProgram, "ourTexture1");
+    GLint texture1Location = glGetUniformLocation(shaderProgram0, "ourTexture1");
     glUniform1i(texture1Location, 0); // 0为纹理单元GL_TEXTURE0
-    GLint texture2Location = glGetUniformLocation(shaderProgram, "ourTexture2");
+    GLint texture2Location = glGetUniformLocation(shaderProgram0, "ourTexture2");
     glUniform1i(texture2Location, 1); // 1为纹理单元GL_TEXTURE1
     
     // 改变纹理透明度
-    textureAlphaLocation = glGetUniformLocation(shaderProgram, "textureAlpha");
+    textureAlphaLocation = glGetUniformLocation(shaderProgram0, "textureAlpha");
     
     // 矩阵变换
-    GLuint transformLoc = glGetUniformLocation(shaderProgram, "trans");
+    GLuint transLocation0 = glGetUniformLocation(shaderProgram0, "trans");
+    GLuint transLocation1 = glGetUniformLocation(shaderProgram1, "trans");
     
     // 投影矩阵
-    GLuint projectionLocation = glGetUniformLocation(shaderProgram, "projection");
+    GLuint projeLocation0 = glGetUniformLocation(shaderProgram0, "projection");
+    GLuint projeLocation1 = glGetUniformLocation(shaderProgram1, "projection");
     
     // 创建一个投影矩阵 - @!!!: Note 需要通过该矩阵将输入坐标转为3D标准化设备坐标.
     mat4 projection(1.0f);
     projection = perspective(radians(45.0f), (float)width / height, 0.1f, 100.0f); // 投影矩阵参数通常这样配置
     
     // 光源颜色
-    GLuint lightColorLocation = glGetUniformLocation(shaderProgram, "lightColor");
+    GLuint lightColorLocation0 = glGetUniformLocation(shaderProgram0, "lightColor");
+    GLuint lightColorLocation1 = glGetUniformLocation(shaderProgram1, "lightColor");
+    
+    // 光源位置
+    GLuint lightPosition0 = glGetUniformLocation(shaderProgram0, "lightPosition");
+    GLuint lightPosition1 = glGetUniformLocation(shaderProgram1, "lightPosition");
+    vec3 lightPosition = vec3(5.0f, 5.0f, 5.0f);
+    
+    // 物体的颜色
+    GLuint objectColorLocation = glGetUniformLocation(shaderProgram0, "objectColor");
     
     // 启用深度测试
     glEnable(GL_DEPTH_TEST);
@@ -171,12 +194,12 @@ void initWindowMakeVisible() {
         
         // 为了避免看见上一次的渲染结果，所以在每次渲染迭代开始时清屏
         glClearColor(0.1, 0.1, 0.1, 1.0);
-        
         // 清空颜色缓冲区之后颜色变为`glClearColor()`所设置的颜色
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         
         
-        glUseProgram(shaderProgram);
+        // 绘制物体
+        glUseProgram(shaderProgram0);
         glBindVertexArray(VAOs[0]);
         
         GLfloat currentTime = glfwGetTime();
@@ -188,24 +211,28 @@ void initWindowMakeVisible() {
         float radius = 10.0f;
         float camX = sin(glfwGetTime()) * radius;
         float camZ = cos(glfwGetTime()) * radius;
-        look = lookAt(vec3(camX, 0.0f, camZ), vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f));
-        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, value_ptr(look));
-        glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, value_ptr(projection));
+        look = lookAt(vec3(camX, 0, camZ), vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f));
+        glUniformMatrix4fv(transLocation0, 1, GL_FALSE, value_ptr(look));
+        glUniformMatrix4fv(projeLocation0, 1, GL_FALSE, value_ptr(projection));
+        glUniform3fv(objectColorLocation, 1, value_ptr(vec3(1.0f, 0.5f, 0.31f)));
+        glUniform3f(lightColorLocation0, 1.0, 1.0, 1.0);
+        glUniform3fv(lightPosition0, 1, value_ptr(lightPosition));
 
         glDrawArrays(GL_TRIANGLES, 0, 36);
         glBindVertexArray(0);
         
+        
         // 绘制光源立方体
-        glUseProgram(lightProgram);
+        glUseProgram(shaderProgram1);
         glBindVertexArray(VAOs[1]);
-        
+
         mat4 modelMatrix(1.0f); // 模型矩阵
-        modelMatrix = translate(modelMatrix, vec3(1.0f, 1.0f, -3.0f)); // 立方体默认局部坐标空间，即(0.0, 0.0, 0.0)，是看不到的，只有将立方体沿Z轴负方向移动一定的距离，才能显示出来，之后再根据需要旋转或者缩放
+        modelMatrix = translate(modelMatrix, vec3(0.5, 0.5, -2.0)); // 立方体默认局部坐标空间，即(0.0, 0.0, 0.0)，是看不到的，只有将立方体沿Z轴负方向移动一定的距离，才能显示出来，之后再根据需要旋转或者缩放
         modelMatrix = scale(modelMatrix, vec3(0.2f, 0.2f, 0.2f));
-        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, value_ptr(modelMatrix));
-        glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, value_ptr(projection));
-        glUniform3f(lightColorLocation, 1.0, 1.0, 1.0);
-        
+        glUniformMatrix4fv(transLocation1, 1, GL_FALSE, value_ptr(modelMatrix));
+        glUniformMatrix4fv(projeLocation1, 1, GL_FALSE, value_ptr(projection));
+        glUniform3f(lightColorLocation1, 1.0, 1.0, 1.0);
+
         glDrawArrays(GL_TRIANGLES, 0, 36);
         glBindVertexArray(0);
         
