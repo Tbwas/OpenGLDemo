@@ -31,6 +31,10 @@ GLfloat textureAlpha;
 vec3 camPosition = vec3(0.0f, 0.0, 3.0f);    // 摄像机位置向量
 vec3 camDirection = vec3(0.0f, 0.0f, -1.0f); // 摄像机方向向量
 vec3 camUp = vec3(0.0f, 1.0f,  0.0f); // 向上向量
+
+//vec3 lightPosition(1.2f, 1.0f, 2.0f); // 光源的位置
+vec3 lightPosition(0.1, 0.5, -2.0);
+
 GLfloat deltaTime = 0.0f; // 当前帧与上一帧绘制的时间差，用来平衡不同硬件间的移动速度
 GLfloat lastTime = 0.0f;
 
@@ -38,6 +42,7 @@ GLfloat lastX = 320.0f; // 设置鼠标初始位置
 GLfloat lastY = 240.0f; // 设置鼠标初始位置
 GLfloat pitchAngle = 0.0f; // 俯仰角
 GLfloat yawAngle = 0.0f; // 偏航角
+
 
 void initWindowMakeVisible();
 void processInputEvent(GLFWwindow *window, int key, int scanCode, int action, int mods);
@@ -59,6 +64,7 @@ GLFWAPI void glfwSwapBuffers(GLFWwindow* window);
  @param value 真正的矩阵数据
  */
 extern void glUniformMatrix4fv (GLint location, GLsizei count, GLboolean transpose, const GLfloat *value);
+
 
 #pragma mark - Main
 
@@ -182,7 +188,9 @@ void initWindowMakeVisible() {
     // 光源位置
     GLuint lightPosition0 = glGetUniformLocation(shaderProgram0, "lightPosition");
     GLuint lightPosition1 = glGetUniformLocation(shaderProgram1, "lightPosition");
-    vec3 lightPosition = vec3(5.0f, 5.0f, 5.0f);
+    
+    // 摄像机位置
+    GLuint camLocation = glGetUniformLocation(shaderProgram0, "viewPosition");
     
     // 物体的颜色
     GLuint objectColorLocation = glGetUniformLocation(shaderProgram0, "objectColor");
@@ -206,17 +214,26 @@ void initWindowMakeVisible() {
         deltaTime = currentTime - lastTime;
         lastTime = currentTime;
 
-        // 创建一个LookAt矩阵 (摄像机位置、目标位置、向上的向量)
+        // 完成model-view变换，即将模型坐标系转换到世界坐标系，再转到相机坐标系
         mat4 look(1.0f);
         float radius = 10.0f;
         float camX = sin(glfwGetTime()) * radius;
         float camZ = cos(glfwGetTime()) * radius;
-        look = lookAt(vec3(camX, 0, camZ), vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 1.0f, 0.0f));
+        
+        /**
+         @param eye: 摄像机位置
+         @param center: 摄像机方向
+         @param up: 向上的向量
+         @discription: 如果摄像机方向定义为 vec3(0.0f, 1.0f, 0.0f)，表示指向Y轴正方向，则相对而言，摄像机就会往下偏移，从而指向Y的正方向.
+         */
+        look = lookAt(vec3(0.0f, 0.0f, 3.0f), camDirection, vec3(0.0f, 1.0f, 0.0f));
+        
         glUniformMatrix4fv(transLocation0, 1, GL_FALSE, value_ptr(look));
         glUniformMatrix4fv(projeLocation0, 1, GL_FALSE, value_ptr(projection));
         glUniform3fv(objectColorLocation, 1, value_ptr(vec3(1.0f, 0.5f, 0.31f)));
         glUniform3f(lightColorLocation0, 1.0, 1.0, 1.0);
         glUniform3fv(lightPosition0, 1, value_ptr(lightPosition));
+        glUniform3fv(camLocation, 1, value_ptr(camPosition));
 
         glDrawArrays(GL_TRIANGLES, 0, 36);
         glBindVertexArray(0);
@@ -227,7 +244,7 @@ void initWindowMakeVisible() {
         glBindVertexArray(VAOs[1]);
 
         mat4 modelMatrix(1.0f); // 模型矩阵
-        modelMatrix = translate(modelMatrix, vec3(0.5, 0.5, -2.0)); // 立方体默认局部坐标空间，即(0.0, 0.0, 0.0)，是看不到的，只有将立方体沿Z轴负方向移动一定的距离，才能显示出来，之后再根据需要旋转或者缩放
+        modelMatrix = translate(modelMatrix, lightPosition); // 立方体默认局部坐标空间，即(0.0, 0.0, 0.0)，是看不到的，只有将立方体沿Z轴负方向移动一定的距离，才能显示出来，之后再根据需要旋转或者缩放
         modelMatrix = scale(modelMatrix, vec3(0.2f, 0.2f, 0.2f));
         glUniformMatrix4fv(transLocation1, 1, GL_FALSE, value_ptr(modelMatrix));
         glUniformMatrix4fv(projeLocation1, 1, GL_FALSE, value_ptr(projection));
@@ -244,6 +261,11 @@ void initWindowMakeVisible() {
     glfwTerminate();
     exit(EXIT_SUCCESS);
 }
+
+
+
+
+
 
 /**
  按键回调
@@ -332,9 +354,9 @@ void mouseCallback(GLFWwindow *window, double xPos, double yPos) {
     
     // 通过俯仰角和偏航角来计算方向向量
     vec3 direction(1.0f);
-    direction.x = cos(radians(pitchAngle)) * cos(radians(yawAngle));
-    direction.y = sin(radians(pitchAngle));
-    direction.z = cos(radians(pitchAngle)) * sin(radians(yawAngle));
+    direction.x = -cos(radians(pitchAngle)) * cos(radians(yawAngle));
+    direction.y = -sin(radians(pitchAngle));
+    direction.z = -cos(radians(pitchAngle)) * sin(radians(yawAngle));
     camDirection = direction;
     
 }

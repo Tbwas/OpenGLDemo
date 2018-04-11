@@ -15,19 +15,30 @@ uniform float textureAlpha;
 uniform vec3 objectColor; // 物体的颜色
 uniform vec3 lightColor; // 光源的颜色
 uniform vec3 lightPosition; // 光源位置
+uniform vec3 viewPosition; // 观察者的世界坐标
 
 void main() {
-    // 使用环境光照很简单，用光的颜色乘以一个很小的常量环境因子，再乘以物体的颜色，然后将该结果作为片段的颜色
-    vec3 ambient = lightColor * 0.1;
     
+    // 环境光照
+    vec3 ambient = 0.1 * lightColor; // 使用环境光照很简单，用光的颜色乘以一个很小的常量环境因子，再乘以物体的颜色，然后将该结果作为片段的颜色
+    
+    // 漫反射光照
     vec3 norm = normalize(outNormalVec); // 法线向量标准化，转为单位向量
     vec3 lightDir = normalize(lightPosition - outFragPosition); // 计算光源和片段位置之间的方向向量（即由片段位置指向光源位置）
     float affect = dot(norm, lightDir); // 两个单位向量点乘得到两者夹角的余弦值，作为光源对当前片段漫发射的影响因子
     affect = max(affect, 0);
     vec3 diffuse = affect * lightColor; // 影响因子和光的颜色相乘，得到漫反射分量，夹角越大，漫反射分量就越小
     
-    // 把环境分量和漫反射分量相加，所得结果再乘以物体的颜色，即为片段最终输出的颜色
-    vec3 result = (ambient + diffuse) * objectColor;
+    // 镜面光照
+    float specularStrength = 0.5; // 镜面强度变量
+    vec3 viewDir = normalize(viewPosition - outFragPosition); // 计算出视线方向向量
+    vec3 reflectDir = reflect(-lightDir, outNormalVec); // 通过入射向量和法向量计算出反射向量
+    float cosVar = max(dot(viewDir, reflectDir), 0); // 视线向量和法线向量夹角的余弦值
+    float spec = pow(cosVar, 32); // 32是高光的反光度，一个物体的反光度越高，反射光的能力越强，散射得越少，高光点就会越小
+    vec3 specular = specularStrength * spec * lightColor; // 计算出镜面分量
+    
+    // 把环境分量、漫反射分量、镜面分量相加，所得结果再乘以物体的颜色，即为片段最终输出的颜色
+    vec3 result = (ambient + diffuse + specular) * objectColor;
     color = vec4(result, 1.0);
     
     // color = vec4(outColor, 1.0);
@@ -38,4 +49,3 @@ void main() {
     // color = texture(ourTexture1, outTexture, textureAlpha) * vec4(outColor, 1.0);
     // color = mix(texture(ourTexture1, outTexture), texture(ourTexture1, outTexture), 0.5);
 }
-
