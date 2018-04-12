@@ -28,16 +28,27 @@ using namespace glm;
 GLint textureAlphaLocation;
 GLfloat textureAlpha;
 
+// 摄像机相关配置
 vec3 camPosition = vec3(0.0f, 0.0, 3.0f);    // 摄像机位置向量
 vec3 camDirection = vec3(0.0f, 0.0f, -1.0f); // 摄像机方向向量
 vec3 camUp = vec3(0.0f, 1.0f,  0.0f); // 向上向量
 
-//vec3 lightPosition(1.2f, 1.0f, 2.0f); // 光源的位置
+// 光源的相关配置
+vec3 lightColor(1.0f, 1.0f, 1.0f);
 vec3 lightPosition(0.1, 0.5, -2.0);
+vec3 lightAmbient(0.2f, 0.2f, 0.2f);
+vec3 lightDiffuse(0.5f, 0.5f, 0.5f);
+vec3 lightSpecular(1.0f, 1.0f, 1.0f);
+
+// 物体材质的相关配置
+vec3 materialAmbient(1.0f, 0.5f, 0.31f);
+vec3 materialDiffuse(1.0f, 0.5f, 0.31f);
+vec3 materialSpecular(0.5f, 0.5f, 0.5f);
 
 GLfloat deltaTime = 0.0f; // 当前帧与上一帧绘制的时间差，用来平衡不同硬件间的移动速度
 GLfloat lastTime = 0.0f;
 
+// 鼠标配置相关
 GLfloat lastX = 320.0f; // 设置鼠标初始位置
 GLfloat lastY = 240.0f; // 设置鼠标初始位置
 GLfloat pitchAngle = 0.0f; // 俯仰角
@@ -181,19 +192,25 @@ void initWindowMakeVisible() {
     mat4 projection(1.0f);
     projection = perspective(radians(45.0f), (float)width / height, 0.1f, 100.0f); // 投影矩阵参数通常这样配置
     
-    // 光源颜色
-    GLuint lightColorLocation0 = glGetUniformLocation(shaderProgram0, "lightColor");
-    GLuint lightColorLocation1 = glGetUniformLocation(shaderProgram1, "lightColor");
+    // 光源
+    GLuint lightPosLoca0 = glGetUniformLocation(shaderProgram0, "light.position");
+    GLuint lightAmbLoca0 = glGetUniformLocation(shaderProgram0, "light.ambient");
+    GLuint lightDifLoca0 = glGetUniformLocation(shaderProgram0, "light.diffuse");
+    GLuint lightSpeLoca0 = glGetUniformLocation(shaderProgram0, "light.specular");
     
-    // 光源位置
-    GLuint lightPosition0 = glGetUniformLocation(shaderProgram0, "lightPosition");
-    GLuint lightPosition1 = glGetUniformLocation(shaderProgram1, "lightPosition");
+    GLuint ligthColorLoca = glGetUniformLocation(shaderProgram1, "lightColor");
     
     // 摄像机位置
     GLuint camLocation = glGetUniformLocation(shaderProgram0, "viewPosition");
     
     // 物体的颜色
     GLuint objectColorLocation = glGetUniformLocation(shaderProgram0, "objectColor");
+    
+    // 物体的材质
+    GLuint materAmbLoca = glGetUniformLocation(shaderProgram0, "material.ambient");
+    GLuint materDifLoca = glGetUniformLocation(shaderProgram0, "material.diffuse");
+    GLuint materSpeLoca = glGetUniformLocation(shaderProgram0, "material.specular");
+    GLuint materShiLoca = glGetUniformLocation(shaderProgram0, "material.shininess");
     
     // 启用深度测试
     glEnable(GL_DEPTH_TEST);
@@ -230,10 +247,26 @@ void initWindowMakeVisible() {
         
         glUniformMatrix4fv(transLocation0, 1, GL_FALSE, value_ptr(look));
         glUniformMatrix4fv(projeLocation0, 1, GL_FALSE, value_ptr(projection));
+        
         glUniform3fv(objectColorLocation, 1, value_ptr(vec3(1.0f, 0.5f, 0.31f)));
-        glUniform3f(lightColorLocation0, 1.0, 1.0, 1.0);
-        glUniform3fv(lightPosition0, 1, value_ptr(lightPosition));
         glUniform3fv(camLocation, 1, value_ptr(camPosition));
+        
+        glUniform3fv(lightPosLoca0, 1, value_ptr(lightPosition));
+        glUniform3fv(lightAmbLoca0, 1, value_ptr(lightAmbient));
+        
+        lightDiffuse.x = sin(glfwGetTime() * 2.0f);
+        lightDiffuse.y = sin(glfwGetTime() * 0.7f);
+        lightDiffuse.z = sin(glfwGetTime() * 1.3f);
+        lightDiffuse = lightDiffuse * 0.5f; // 降低影响
+        
+        glUniform3fv(lightDifLoca0, 1, value_ptr(lightDiffuse));
+        
+        glUniform3fv(lightSpeLoca0, 1, value_ptr(lightSpecular));
+        
+        glUniform3fv(materAmbLoca, 1, value_ptr(materialAmbient));
+        glUniform3fv(materDifLoca, 1, value_ptr(materialDiffuse));
+        glUniform3fv(materSpeLoca, 1, value_ptr(materialSpecular));
+        glUniform1f(materShiLoca, 32.0f);
 
         glDrawArrays(GL_TRIANGLES, 0, 36);
         glBindVertexArray(0);
@@ -248,7 +281,7 @@ void initWindowMakeVisible() {
         modelMatrix = scale(modelMatrix, vec3(0.2f, 0.2f, 0.2f));
         glUniformMatrix4fv(transLocation1, 1, GL_FALSE, value_ptr(modelMatrix));
         glUniformMatrix4fv(projeLocation1, 1, GL_FALSE, value_ptr(projection));
-        glUniform3f(lightColorLocation1, 1.0, 1.0, 1.0);
+        glUniform3fv(ligthColorLoca, 1, value_ptr(lightColor));
 
         glDrawArrays(GL_TRIANGLES, 0, 36);
         glBindVertexArray(0);
