@@ -30,4 +30,3 @@ void main() {
     outNormalVec = normalVector;
     outFragPosition = vec3(trans * vec4(position, 1.0)); // 计算片段位置向量有点难以理解
 }
-
