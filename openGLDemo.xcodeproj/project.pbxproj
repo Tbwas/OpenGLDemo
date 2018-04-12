@@ -37,6 +37,8 @@
 		FA29E4D6204E77880091374C /* ShaderProgram.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ShaderProgram.cpp; sourceTree = "<group>"; };
 		FA29E4D7204E77880091374C /* ShaderProgram.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ShaderProgram.hpp; sourceTree = "<group>"; };
 		FA29E4D9204E959F0091374C /* FragmentShader.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = FragmentShader.frag; sourceTree = "<group>"; };
+		FA2C1C3C207F53B00069F636 /* cutepng.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = cutepng.png; sourceTree = "<group>"; };
+		FA2C1C3D207F547C0069F636 /* awesomeface.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = awesomeface.png; sourceTree = "<group>"; };
 		FA2C501A2050E096005F9BDF /* stb_image.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = stb_image.h; sourceTree = "<group>"; };
 		FA2C501B2050E0C2005F9BDF /* stb_image.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = stb_image.cpp; sourceTree = "<group>"; };
 		FA2C501D2050E16C005F9BDF /* container.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = container.jpg; sourceTree = "<group>"; };
@@ -111,6 +113,8 @@
 		FA6AF931204D51DC008D087E /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				FA2C1C3C207F53B00069F636 /* cutepng.png */,
+				FA2C1C3D207F547C0069F636 /* awesomeface.png */,
 				FA2C502220513911005F9BDF /* cute.jpg */,
 				FA2C501D2050E16C005F9BDF /* container.jpg */,
 				FA2C5023205140B0005F9BDF /* VertextShader.vert */,

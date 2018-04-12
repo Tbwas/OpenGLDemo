@@ -104,7 +104,7 @@ void initWindowMakeVisible() {
     while (!glfwWindowShouldClose(window)) {
         
         // 为了避免看见上一次的渲染结果，所以在每次渲染迭代开始时清屏
-        glClearColor(255.0, 255.0, 255.0, 1.0);
+        glClearColor(0.0, 0.0, 0.0, 1.0);
         glClear(GL_COLOR_BUFFER_BIT); // 清空颜色缓冲区, 之后颜色变为`glClearColor()`所设置的颜色
         
         // 颜色更新, 必须先激活program才能使用uniform

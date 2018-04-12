@@ -16,7 +16,7 @@ using namespace std;
 GLuint FragmentShader:: createFragmentShader() {
     
     string fShaderString;
-    string fShaderPath = "/Users/momo/Desktop/OpenGL学习/FragmentShader.frag";
+    string fShaderPath = "/Users/momo/Desktop/OpenGLDemo/openGLDemo/Resources/FragmentShader.frag";
     ifstream fileStream;
     ostringstream strStream;
     

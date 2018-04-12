@@ -99,7 +99,7 @@ GLuint* DataSource:: setupData() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); // 放大时的过滤方式
     
     stbi_set_flip_vertically_on_load(true); // 图片竖直翻转
-    imageData = stbi_load("/Users/momo/Desktop/OpenGLDemo/openGLDemo/Resources/cute.jpg", &width, &height, &alpha, 0);
+    imageData = stbi_load("/Users/momo/Desktop/OpenGLDemo/openGLDemo/Resources/cutepng.png", &width, &height, &alpha, 0);
     if (imageData) {
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, imageData);
     } else {
