@@ -172,10 +172,8 @@ void initWindowMakeVisible() {
     
     
     // 告诉OpenGL每个采样器对应哪个纹理单元，然后方可获取纹理对象
-    GLint texture1Location = glGetUniformLocation(shaderProgram0, "ourTexture1");
-    glUniform1i(texture1Location, 0); // 0为纹理单元GL_TEXTURE0
-    GLint texture2Location = glGetUniformLocation(shaderProgram0, "ourTexture2");
-    glUniform1i(texture2Location, 1); // 1为纹理单元GL_TEXTURE1
+    GLint textureLoca = glGetUniformLocation(shaderProgram0, "material.diffuse");
+    glUniform1i(textureLoca, 0); // 0为纹理单元GL_TEXTURE0
     
     // 改变纹理透明度
     textureAlphaLocation = glGetUniformLocation(shaderProgram0, "textureAlpha");
@@ -207,8 +205,6 @@ void initWindowMakeVisible() {
     GLuint objectColorLocation = glGetUniformLocation(shaderProgram0, "objectColor");
     
     // 物体的材质
-    GLuint materAmbLoca = glGetUniformLocation(shaderProgram0, "material.ambient");
-    GLuint materDifLoca = glGetUniformLocation(shaderProgram0, "material.diffuse");
     GLuint materSpeLoca = glGetUniformLocation(shaderProgram0, "material.specular");
     GLuint materShiLoca = glGetUniformLocation(shaderProgram0, "material.shininess");
     
@@ -253,18 +249,13 @@ void initWindowMakeVisible() {
         
         glUniform3fv(lightPosLoca0, 1, value_ptr(lightPosition));
         glUniform3fv(lightAmbLoca0, 1, value_ptr(lightAmbient));
-        
         lightDiffuse.x = sin(glfwGetTime() * 2.0f);
         lightDiffuse.y = sin(glfwGetTime() * 0.7f);
         lightDiffuse.z = sin(glfwGetTime() * 1.3f);
-        lightDiffuse = lightDiffuse * 0.5f; // 降低影响
-        
+        lightDiffuse = lightDiffuse * 1.0f; // 降低影响
         glUniform3fv(lightDifLoca0, 1, value_ptr(lightDiffuse));
-        
         glUniform3fv(lightSpeLoca0, 1, value_ptr(lightSpecular));
-        
-        glUniform3fv(materAmbLoca, 1, value_ptr(materialAmbient));
-        glUniform3fv(materDifLoca, 1, value_ptr(materialDiffuse));
+    
         glUniform3fv(materSpeLoca, 1, value_ptr(materialSpecular));
         glUniform1f(materShiLoca, 32.0f);
 

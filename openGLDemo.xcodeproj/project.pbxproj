@@ -38,6 +38,8 @@
 		FA29E4D6204E77880091374C /* ShaderProgram.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ShaderProgram.cpp; sourceTree = "<group>"; };
 		FA29E4D7204E77880091374C /* ShaderProgram.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ShaderProgram.hpp; sourceTree = "<group>"; };
 		FA29E4D9204E959F0091374C /* FragmentShader.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = FragmentShader.frag; sourceTree = "<group>"; };
+		FA2C1C3E207F771C0069F636 /* lightBox.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = lightBox.jpg; sourceTree = "<group>"; };
+		FA2C1C3F207F79930069F636 /* dxh.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = dxh.jpg; sourceTree = "<group>"; };
 		FA2C501A2050E096005F9BDF /* stb_image.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = stb_image.h; sourceTree = "<group>"; };
 		FA2C501B2050E0C2005F9BDF /* stb_image.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = stb_image.cpp; sourceTree = "<group>"; };
 		FA2C501D2050E16C005F9BDF /* container.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = container.jpg; sourceTree = "<group>"; };
@@ -312,6 +314,7 @@
 		FA5526D72052A478000FCBA3 /* vector_relational.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = vector_relational.hpp; sourceTree = "<group>"; };
 		FA5D8335201C5F8F009059B5 /* VertexShader.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = VertexShader.cpp; sourceTree = "<group>"; };
 		FA5D8336201C5F8F009059B5 /* VertexShader.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = VertexShader.hpp; sourceTree = "<group>"; };
+		FAE7EEC82080D8AB0043962A /* highLight.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = highLight.jpg; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -686,6 +689,9 @@
 		FA6AF931204D51DC008D087E /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				FA2C1C3F207F79930069F636 /* dxh.jpg */,
+				FA2C1C3E207F771C0069F636 /* lightBox.jpg */,
+				FAE7EEC82080D8AB0043962A /* highLight.jpg */,
 				FA2C502220513911005F9BDF /* cute.jpg */,
 				FA2C501D2050E16C005F9BDF /* container.jpg */,
 				FA2C5023205140B0005F9BDF /* VertextShader.vert */,
