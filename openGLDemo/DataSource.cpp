@@ -138,8 +138,8 @@ GLuint* DataSource:: setupData() {
 /*------------------------------^_^---华丽的分割线---^_^-------------------------------------------------*/
     
     // 纹理
-    GLuint ourTexture1[1]; // 可以为一个数组
-    glGenTextures(1, ourTexture1);
+    GLuint ourTexture1[2]; // 可以为一个数组
+    glGenTextures(2, ourTexture1);
     
     // 纹理单元0默认为激活
     glActiveTexture(GL_TEXTURE0);
@@ -155,7 +155,7 @@ GLuint* DataSource:: setupData() {
     // 使用图片数据生成纹理并保存在纹理对象中
     int width, height, alpha;
     stbi_set_flip_vertically_on_load(true);
-    unsigned char *imageData = stbi_load("/Users/momo/Desktop/OpenGLDemo/openGLDemo/Resources/highLight.jpg", &width, &height, &alpha, 0);
+    unsigned char *imageData = stbi_load("/Users/momo/Desktop/OpenGLDemo/openGLDemo/Resources/lightBox.jpg", &width, &height, &alpha, 0);
     if (imageData) {
         // 将图像数据被添加到纹理对象ourTexture1上
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, imageData);
@@ -165,6 +165,25 @@ GLuint* DataSource:: setupData() {
         exit(EXIT_SUCCESS);
     }
     stbi_image_free(imageData); // 释放图片数据
+    
+    
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, ourTexture1[1]);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+    imageData = stbi_load("/Users/momo/Desktop/OpenGLDemo/openGLDemo/Resources/highLight.jpg", &width, &height, &alpha, 0);
+    if (imageData) {
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, imageData);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    } else {
+        cout << "Failed to load second texture image" << endl;
+        exit(EXIT_SUCCESS);
+    }
+    stbi_image_free(imageData);
     
     
 /*------------------------------^_^---华丽的分割线---^_^-------------------------------------------------*/

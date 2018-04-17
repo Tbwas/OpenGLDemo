@@ -170,11 +170,6 @@ void initWindowMakeVisible() {
     
 /*------------------------------^_^---华丽的分割线---^_^-------------------------------------------------*/
     
-    
-    // 告诉OpenGL每个采样器对应哪个纹理单元，然后方可获取纹理对象
-    GLint textureLoca = glGetUniformLocation(shaderProgram0, "material.diffuse");
-    glUniform1i(textureLoca, 0); // 0为纹理单元GL_TEXTURE0
-    
     // 改变纹理透明度
     textureAlphaLocation = glGetUniformLocation(shaderProgram0, "textureAlpha");
     
@@ -205,7 +200,6 @@ void initWindowMakeVisible() {
     GLuint objectColorLocation = glGetUniformLocation(shaderProgram0, "objectColor");
     
     // 物体的材质
-    GLuint materSpeLoca = glGetUniformLocation(shaderProgram0, "material.specular");
     GLuint materShiLoca = glGetUniformLocation(shaderProgram0, "material.shininess");
     
     // 启用深度测试
@@ -256,8 +250,12 @@ void initWindowMakeVisible() {
         glUniform3fv(lightDifLoca0, 1, value_ptr(lightDiffuse));
         glUniform3fv(lightSpeLoca0, 1, value_ptr(lightSpecular));
     
-        glUniform3fv(materSpeLoca, 1, value_ptr(materialSpecular));
         glUniform1f(materShiLoca, 32.0f);
+        
+        GLint materDifLoca = glGetUniformLocation(shaderProgram0, "material.diffuse"); // 告诉OpenGL每个采样器对应哪个纹理单元，然后方可获取纹理对象
+        glUniform1i(materDifLoca, 0); // 0为纹理单元GL_TEXTURE0
+        GLuint materSpeLoca = glGetUniformLocation(shaderProgram0, "material.specular");
+        glUniform1i(materSpeLoca, 1);
 
         glDrawArrays(GL_TRIANGLES, 0, 36);
         glBindVertexArray(0);
