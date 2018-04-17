@@ -252,10 +252,12 @@ void initWindowMakeVisible() {
     
         glUniform1f(materShiLoca, 32.0f);
         
-        GLint materDifLoca = glGetUniformLocation(shaderProgram0, "material.diffuse"); // 告诉OpenGL每个采样器对应哪个纹理单元，然后方可获取纹理对象
+        GLuint materDifLoca = glGetUniformLocation(shaderProgram0, "material.diffuse"); // 告诉OpenGL每个采样器对应哪个纹理单元，然后方可获取纹理对象
         glUniform1i(materDifLoca, 0); // 0为纹理单元GL_TEXTURE0
         GLuint materSpeLoca = glGetUniformLocation(shaderProgram0, "material.specular");
         glUniform1i(materSpeLoca, 1);
+        GLuint materialEmiLoca = glGetUniformLocation(shaderProgram0, "material.emission");
+        glUniform1i(materialEmiLoca, 2);
 
         glDrawArrays(GL_TRIANGLES, 0, 36);
         glBindVertexArray(0);

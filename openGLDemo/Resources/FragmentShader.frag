@@ -11,6 +11,7 @@ out vec4 color; // 片段着色器输出的变量名可以为任意，但是类�
 struct Material {
     sampler2D diffuse; // 漫反射贴图
     sampler2D specular; // 镜面光照贴图
+    sampler2D emission; // 发光贴图
     float shininess; // 反光度
 };
 
@@ -23,8 +24,6 @@ struct Light {
 };
 
 // uniform是一种从CPU中的应用向GPU中的着色器发送数据的方式，全局的
-uniform sampler2D ourTexture1; // 通过采样器来获取纹理对象(即贴图)
-uniform sampler2D ourTexture2; // 再定义一个采样器来获取另一个纹理
 uniform float textureAlpha;
 
 uniform vec3 viewPosition; // 观察者的世界坐标
@@ -50,18 +49,13 @@ void main() {
     vec3 reflectDir = reflect(-lightDir, outNormalVec); // 通过入射向量和法向量计算出反射向量
     float cosVar = max(dot(viewDir, reflectDir), 0); // 视线向量和反射向量夹角的余弦值
     float spec = pow(cosVar, material.shininess); // 32是高光的反光度，一个物体的反光度越高，反射光的能力越强，散射得越少，高光点就会越小
-    vec3 specular = spec * light.specular * vec3(texture(material.specular, outTexture)); // 计算出镜面分量
+    // vec3 specular = spec * light.specular * vec3(texture(material.specular, outTexture)); // 计算出镜面分量
+    vec3 specular = spec * light.specular * (vec3(1.0) - vec3(texture(material.specular, outTexture))); // 这里反转采样颜色，黑变白、白变黑
+    
+    // 发射光
+    vec3 emission = light.ambient * vec3(texture(material.emission, outTexture));
     
     // 把环境分量、漫反射分量、镜面分量相加，所得结果再乘以物体的颜色，即为片段最终输出的颜色
-    vec3 result = (ambient + diffuse + specular);
+    vec3 result = (ambient + diffuse + specular + emission);
     color = vec4(result, 1.0);
-    
-    // color = vec4(outColor, 1.0);
-    // color = vec4(outPosition, 1.0);
-    // color = vec4(0.0, 1.0, 0.0, 1.0);
-    // color = texture(ourTexture1, outTexture) * vec4(outColor, 1.0);
-    // color = mix(texture(ourTexture1, outTexture), texture(ourTexture2, outTexture), textureAlpha) * vec4(outColor, 1.0); // 0.3表示返回第一个颜色70%和第二个颜色30%的混合色
-    // color = texture(ourTexture1, outTexture, textureAlpha) * vec4(outColor, 1.0);
-    // color = mix(texture(ourTexture1, outTexture), texture(ourTexture1, outTexture), 0.5);
 }
-

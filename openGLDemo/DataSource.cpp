@@ -138,14 +138,12 @@ GLuint* DataSource:: setupData() {
 /*------------------------------^_^---华丽的分割线---^_^-------------------------------------------------*/
     
     // 纹理
-    GLuint ourTexture1[2]; // 可以为一个数组
-    glGenTextures(2, ourTexture1);
+    GLuint textureNames[3]; // 可以为一个数组
+    glGenTextures(3, textureNames);
     
-    // 纹理单元0默认为激活
+    /*第一个纹理*/
     glActiveTexture(GL_TEXTURE0);
-    
-    // 将纹理对象ourTexture1绑定到纹理单元0上，并告诉OpenGL这个纹理对象是一个2D纹理
-    glBindTexture(GL_TEXTURE_2D, ourTexture1[0]);
+    glBindTexture(GL_TEXTURE_2D, textureNames[0]);
     
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE); // s轴环绕方式
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE); // t轴环绕方式
@@ -167,8 +165,9 @@ GLuint* DataSource:: setupData() {
     stbi_image_free(imageData); // 释放图片数据
     
     
+    /*第二个纹理*/
     glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, ourTexture1[1]);
+    glBindTexture(GL_TEXTURE_2D, textureNames[1]);
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -181,6 +180,26 @@ GLuint* DataSource:: setupData() {
         glGenerateMipmap(GL_TEXTURE_2D);
     } else {
         cout << "Failed to load second texture image" << endl;
+        exit(EXIT_SUCCESS);
+    }
+    stbi_image_free(imageData);
+    
+    
+    /*第三个纹理*/
+    glActiveTexture(GL_TEXTURE2);
+    glBindTexture(GL_TEXTURE_2D, textureNames[2]);
+    
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    
+    imageData = stbi_load("/Users/momo/Desktop/OpenGLDemo/openGLDemo/Resources/matrix.jpg",&width, &height, &alpha, 0);
+    if (imageData) {
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, imageData);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    } else {
+        cout << "Failed to load third texture image" << endl;
         exit(EXIT_SUCCESS);
     }
     stbi_image_free(imageData);
