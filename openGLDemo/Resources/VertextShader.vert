@@ -13,20 +13,16 @@ out vec3 outNormalVec; // 将法向量传递到片段着色器
 out vec3 outFragPosition; // 将片段的位置传递到片段着色器
 
 // uniform float xOffset;
-uniform mat4 trans; // 矩阵变换
 uniform mat4 model; // 模型矩阵
 uniform mat4 view;  // 视觉矩阵
 uniform mat4 projection; // 投影矩阵
 
 void main() {
     // gl_Position设置的值会成为顶点着色器的输出
-    // gl_Position = vec4(position, 1.0);
-    gl_Position = projection * trans * vec4(position, 1.0);
-    // gl_Position = projection * trans * view * model * vec4(position.x, position.y, position.z, 1.0);
-    // gl_Position = trans * vec4(position.x, position.y, position.z, 1.0);
-    // gl_Position = projection * view * model * vec4(position, 1.0);
+    gl_Position = projection * view * model * vec4(position, 1.0);
     outPosition = position;
     outTexture = vTexture;
     outNormalVec = normalVector;
-    outFragPosition = vec3(trans * vec4(position, 1.0)); // 计算片段位置向量有点难以理解
+    outFragPosition = vec3(view * model * vec4(position, 1.0)); // 计算片段位置向量有点难以理解
 }
+

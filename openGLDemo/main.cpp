@@ -169,13 +169,28 @@ void initWindowMakeVisible() {
     
     
 /*------------------------------^_^---华丽的分割线---^_^-------------------------------------------------*/
+   // 定义多个立方体的位置
+    vec3 cubePositions[] = {
+        glm::vec3( 0.0f,  0.0f,  0.0f),
+        glm::vec3( 2.0f,  5.0f, -15.0f),
+        glm::vec3(-1.5f, -2.2f, -2.5f),
+        glm::vec3(-3.8f, -2.0f, -12.3f),
+        glm::vec3( 2.4f, -0.4f, -3.5f),
+        glm::vec3(-1.7f,  3.0f, -7.5f),
+        glm::vec3( 1.3f, -2.0f, -2.5f),
+        glm::vec3( 1.5f,  2.0f, -2.5f),
+        glm::vec3( 1.5f,  0.2f, -1.5f),
+        glm::vec3(-1.3f,  1.0f, -1.5f)
+    };
     
     // 改变纹理透明度
     textureAlphaLocation = glGetUniformLocation(shaderProgram0, "textureAlpha");
     
-    // 矩阵变换
-    GLuint transLocation0 = glGetUniformLocation(shaderProgram0, "trans");
-    GLuint transLocation1 = glGetUniformLocation(shaderProgram1, "trans");
+    // 模型矩阵
+    GLuint modelLoca = glGetUniformLocation(shaderProgram0, "model");
+    
+    // 视觉矩阵
+    GLuint viewLoca = glGetUniformLocation(shaderProgram0, "view");
     
     // 投影矩阵
     GLuint projeLocation0 = glGetUniformLocation(shaderProgram0, "projection");
@@ -186,12 +201,15 @@ void initWindowMakeVisible() {
     projection = perspective(radians(45.0f), (float)width / height, 0.1f, 100.0f); // 投影矩阵参数通常这样配置
     
     // 光源
-    GLuint lightPosLoca0 = glGetUniformLocation(shaderProgram0, "light.position");
     GLuint lightAmbLoca0 = glGetUniformLocation(shaderProgram0, "light.ambient");
     GLuint lightDifLoca0 = glGetUniformLocation(shaderProgram0, "light.diffuse");
     GLuint lightSpeLoca0 = glGetUniformLocation(shaderProgram0, "light.specular");
+    GLuint lightDirLoca0 = glGetUniformLocation(shaderProgram0, "light.direction");
+    GLuint lightConLoca0 = glGetUniformLocation(shaderProgram0, "light.constant");
+    GLuint lightLinLoca0 = glGetUniformLocation(shaderProgram0, "light.linear");
+    GLuint lightQuaLoca0 = glGetUniformLocation(shaderProgram0, "light.quadratic");
     
-    GLuint ligthColorLoca = glGetUniformLocation(shaderProgram1, "lightColor");
+    GLuint lightColorLoca = glGetUniformLocation(shaderProgram1, "lightColor");
     
     // 摄像机位置
     GLuint camLocation = glGetUniformLocation(shaderProgram0, "viewPosition");
@@ -233,23 +251,38 @@ void initWindowMakeVisible() {
          @param up: 向上的向量
          @discription: 如果摄像机方向定义为 vec3(0.0f, 1.0f, 0.0f)，表示指向Y轴正方向，则相对而言，摄像机就会往下偏移，从而指向Y的正方向.
          */
-        look = lookAt(vec3(0.0f, 0.0f, 3.0f), camDirection, vec3(0.0f, 1.0f, 0.0f));
+//        look = lookAt(vec3(0.0f, 0.0f, 3.0f), camDirection, vec3(0.0f, 1.0f, 0.0f));
+//        glUniformMatrix4fv(transLocation0, 1, GL_FALSE, value_ptr(look));
         
-        glUniformMatrix4fv(transLocation0, 1, GL_FALSE, value_ptr(look));
+        mat4 view(1.0f);
+        view = glm::translate(view, vec3(0.0, 0.0, -3.0f));
+        glUniformMatrix4fv(viewLoca, 1, GL_FALSE, value_ptr(view));
+        
+        mat4 model(1.0f);
+        model = glm::rotate(model, glm::radians(20.0f), glm::vec3(1.0f, 0.3f, 0.5f));
+        glUniformMatrix4fv(modelLoca, 1, GL_FALSE, value_ptr(model));
+        
         glUniformMatrix4fv(projeLocation0, 1, GL_FALSE, value_ptr(projection));
         
         glUniform3fv(objectColorLocation, 1, value_ptr(vec3(1.0f, 0.5f, 0.31f)));
         glUniform3fv(camLocation, 1, value_ptr(camPosition));
         
-        glUniform3fv(lightPosLoca0, 1, value_ptr(lightPosition));
+        // 光源
         glUniform3fv(lightAmbLoca0, 1, value_ptr(lightAmbient));
-        lightDiffuse.x = sin(glfwGetTime() * 2.0f);
-        lightDiffuse.y = sin(glfwGetTime() * 0.7f);
-        lightDiffuse.z = sin(glfwGetTime() * 1.3f);
+//        lightDiffuse.x = sin(glfwGetTime() * 2.0f);
+//        lightDiffuse.y = sin(glfwGetTime() * 0.7f);
+//        lightDiffuse.z = sin(glfwGetTime() * 1.3f);
+        lightDiffuse = vec3(1.0, 0.0, 0.0);
+        
         lightDiffuse = lightDiffuse * 1.0f; // 降低影响
         glUniform3fv(lightDifLoca0, 1, value_ptr(lightDiffuse));
         glUniform3fv(lightSpeLoca0, 1, value_ptr(lightSpecular));
+        glUniform3fv(lightDirLoca0, 1, value_ptr(vec3(-2.0f, -2.0f, -2.0f))); // 定向光的方向
+        glUniform1f(lightConLoca0, 1.0f);
+        glUniform1f(lightLinLoca0, 0.09f); // 衰减公式一次项系数
+        glUniform1f(lightQuaLoca0, 0.032f); // 衰减公式二次项系数
     
+        // 物体材质
         glUniform1f(materShiLoca, 32.0f);
         
         GLuint materDifLoca = glGetUniformLocation(shaderProgram0, "material.diffuse"); // 告诉OpenGL每个采样器对应哪个纹理单元，然后方可获取纹理对象
@@ -258,8 +291,16 @@ void initWindowMakeVisible() {
         glUniform1i(materSpeLoca, 1);
         GLuint materialEmiLoca = glGetUniformLocation(shaderProgram0, "material.emission");
         glUniform1i(materialEmiLoca, 2);
-
-        glDrawArrays(GL_TRIANGLES, 0, 36);
+        
+        for (unsigned int i = 0; i < 10; i++) {
+            glm::mat4 model(1.0f);
+            model = glm::translate(model, cubePositions[i]);
+            float angle = 20.0f * i;
+            model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+            glUniformMatrix4fv(modelLoca, 1, GL_FALSE, value_ptr(model));
+            glDrawArrays(GL_TRIANGLES, 0, 36);
+        }
+//        glDrawArrays(GL_TRIANGLES, 0, 36);
         glBindVertexArray(0);
         
         
@@ -270,9 +311,8 @@ void initWindowMakeVisible() {
         mat4 modelMatrix(1.0f); // 模型矩阵
         modelMatrix = translate(modelMatrix, lightPosition); // 立方体默认局部坐标空间，即(0.0, 0.0, 0.0)，是看不到的，只有将立方体沿Z轴负方向移动一定的距离，才能显示出来，之后再根据需要旋转或者缩放
         modelMatrix = scale(modelMatrix, vec3(0.2f, 0.2f, 0.2f));
-        glUniformMatrix4fv(transLocation1, 1, GL_FALSE, value_ptr(modelMatrix));
         glUniformMatrix4fv(projeLocation1, 1, GL_FALSE, value_ptr(projection));
-        glUniform3fv(ligthColorLoca, 1, value_ptr(lightColor));
+        glUniform3fv(lightColorLoca, 1, value_ptr(lightColor));
 
         glDrawArrays(GL_TRIANGLES, 0, 36);
         glBindVertexArray(0);
