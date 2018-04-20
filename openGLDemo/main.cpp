@@ -201,6 +201,7 @@ void initWindowMakeVisible() {
     projection = perspective(radians(45.0f), (float)width / height, 0.1f, 100.0f); // 投影矩阵参数通常这样配置
     
     // 光源
+    GLuint lightPosLoca0 = glGetUniformLocation(shaderProgram0, "light.position");
     GLuint lightAmbLoca0 = glGetUniformLocation(shaderProgram0, "light.ambient");
     GLuint lightDifLoca0 = glGetUniformLocation(shaderProgram0, "light.diffuse");
     GLuint lightSpeLoca0 = glGetUniformLocation(shaderProgram0, "light.specular");
@@ -208,6 +209,8 @@ void initWindowMakeVisible() {
     GLuint lightConLoca0 = glGetUniformLocation(shaderProgram0, "light.constant");
     GLuint lightLinLoca0 = glGetUniformLocation(shaderProgram0, "light.linear");
     GLuint lightQuaLoca0 = glGetUniformLocation(shaderProgram0, "light.quadratic");
+    GLuint lightCutLoca0 = glGetUniformLocation(shaderProgram0, "light.cutOff");
+    
     
     GLuint lightColorLoca = glGetUniformLocation(shaderProgram1, "lightColor");
     
@@ -268,6 +271,7 @@ void initWindowMakeVisible() {
         glUniform3fv(camLocation, 1, value_ptr(camPosition));
         
         // 光源
+        glUniform3fv(lightPosLoca0, 1, value_ptr(vec3(1.2f, 1.0f, 2.0f)));
         glUniform3fv(lightAmbLoca0, 1, value_ptr(lightAmbient));
 //        lightDiffuse.x = sin(glfwGetTime() * 2.0f);
 //        lightDiffuse.y = sin(glfwGetTime() * 0.7f);
@@ -277,14 +281,14 @@ void initWindowMakeVisible() {
         lightDiffuse = lightDiffuse * 1.0f; // 降低影响
         glUniform3fv(lightDifLoca0, 1, value_ptr(lightDiffuse));
         glUniform3fv(lightSpeLoca0, 1, value_ptr(lightSpecular));
-        glUniform3fv(lightDirLoca0, 1, value_ptr(vec3(-2.0f, -2.0f, -2.0f))); // 定向光的方向
+        glUniform3fv(lightDirLoca0, 1, value_ptr(camDirection)); // 定向光的方向
         glUniform1f(lightConLoca0, 1.0f);
         glUniform1f(lightLinLoca0, 0.09f); // 衰减公式一次项系数
         glUniform1f(lightQuaLoca0, 0.032f); // 衰减公式二次项系数
-    
+        glUniform1f(lightCutLoca0, cos(glm::radians(12.5f)));
+        
         // 物体材质
         glUniform1f(materShiLoca, 32.0f);
-        
         GLuint materDifLoca = glGetUniformLocation(shaderProgram0, "material.diffuse"); // 告诉OpenGL每个采样器对应哪个纹理单元，然后方可获取纹理对象
         glUniform1i(materDifLoca, 0); // 0为纹理单元GL_TEXTURE0
         GLuint materSpeLoca = glGetUniformLocation(shaderProgram0, "material.specular");
@@ -399,6 +403,8 @@ void processInputEvent(GLFWwindow *window, int key, int scanCode, int action, in
  @param yPos y位置
  */
 void mouseCallback(GLFWwindow *window, double xPos, double yPos) {
+    return;
+    
     cout << "鼠标在移动, x: " << xPos << " y: " << yPos << endl;
     
     float xOffset = xPos - lastX;
