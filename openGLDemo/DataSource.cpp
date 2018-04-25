@@ -150,6 +150,8 @@ GLuint* DataSource:: setupData() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST); // 缩小时的过滤方式
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST); // 放大时的过滤方式
     
+    // 我是测试
+    
     // 使用图片数据生成纹理并保存在纹理对象中
     int width, height, alpha;
     stbi_set_flip_vertically_on_load(true);
