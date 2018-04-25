@@ -143,7 +143,6 @@ GLuint* DataSource:: setupData() {
     
     /*第一个纹理*/
     glActiveTexture(GL_TEXTURE0);
-    // 第二次修改
     glBindTexture(GL_TEXTURE_2D, textureNames[0]);
     
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE); // s轴环绕方式
