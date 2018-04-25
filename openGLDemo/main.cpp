@@ -31,7 +31,7 @@ GLfloat textureAlpha;
 // 摄像机相关配置
 vec3 camPosition = vec3(0.0f, 0.0, 3.0f);    // 摄像机位置向量
 vec3 camDirection = vec3(0.0f, 0.0f, -1.0f); // 摄像机方向向量
-vec3 camUp = vec3(0.0f, 1.0f, 0.0f); // 向上向量
+vec3 camUp = vec3(0.0f, 1.0f,  0.0f); // 向上向量
 
 // 光源的相关配置
 vec3 lightColor(1.0f, 1.0f, 1.0f);
@@ -201,18 +201,15 @@ void initWindowMakeVisible() {
     projection = perspective(radians(45.0f), (float)width / height, 0.1f, 100.0f); // 投影矩阵参数通常这样配置
     
     // 光源
-    GLuint poiLigPosLoca = glGetUniformLocation(shaderProgram0, "pointLight[0].position");
-    GLuint poiLigAmbLoca = glGetUniformLocation(shaderProgram0, "pointLight[0].ambient");
-    GLuint poiLigDifLoca = glGetUniformLocation(shaderProgram0, "pointLight[0].diffuse");
-    GLuint poiLigSpeLoca = glGetUniformLocation(shaderProgram0, "pointLight[0].specular");
-    GLuint poiLigConLoca = glGetUniformLocation(shaderProgram0, "pointLight[0].constant");
-    GLuint poiLigLinLoca = glGetUniformLocation(shaderProgram0, "pointLight[0].linear");
-    GLuint poiLigQuaLoca = glGetUniformLocation(shaderProgram0, "pointLight[0].quadratic");
-    
-    GLuint dirLigDirLoca = glGetUniformLocation(shaderProgram0, "dirLight.direction");
-    GLuint dirLigAmbLoca = glGetUniformLocation(shaderProgram0, "dirLight.ambient");
-    GLuint dirLigDifLoca = glGetUniformLocation(shaderProgram0, "dirLight.diffuse");
-    GLuint dirLigSpeLoca = glGetUniformLocation(shaderProgram0, "dirLight.specular");
+    GLuint lightPosLoca0 = glGetUniformLocation(shaderProgram0, "light.position");
+    GLuint lightAmbLoca0 = glGetUniformLocation(shaderProgram0, "light.ambient");
+    GLuint lightDifLoca0 = glGetUniformLocation(shaderProgram0, "light.diffuse");
+    GLuint lightSpeLoca0 = glGetUniformLocation(shaderProgram0, "light.specular");
+    GLuint lightDirLoca0 = glGetUniformLocation(shaderProgram0, "light.direction");
+    GLuint lightConLoca0 = glGetUniformLocation(shaderProgram0, "light.constant");
+    GLuint lightLinLoca0 = glGetUniformLocation(shaderProgram0, "light.linear");
+    GLuint lightQuaLoca0 = glGetUniformLocation(shaderProgram0, "light.quadratic");
+    GLuint lightCutLoca0 = glGetUniformLocation(shaderProgram0, "light.cutOff");
     
     
     GLuint lightColorLoca = glGetUniformLocation(shaderProgram1, "lightColor");
@@ -273,25 +270,22 @@ void initWindowMakeVisible() {
         glUniform3fv(objectColorLocation, 1, value_ptr(vec3(1.0f, 0.5f, 0.31f)));
         glUniform3fv(camLocation, 1, value_ptr(camPosition));
         
-        // 点光源
-        glUniform3fv(poiLigPosLoca, 1, value_ptr(vec3(1.0f, 1.0f, 3.0f)));
-        glUniform3fv(poiLigAmbLoca, 1, value_ptr(lightAmbient));
-        
+        // 光源
+        glUniform3fv(lightPosLoca0, 1, value_ptr(vec3(1.2f, 1.0f, 2.0f)));
+        glUniform3fv(lightAmbLoca0, 1, value_ptr(lightAmbient));
 //        lightDiffuse.x = sin(glfwGetTime() * 2.0f);
 //        lightDiffuse.y = sin(glfwGetTime() * 0.7f);
 //        lightDiffuse.z = sin(glfwGetTime() * 1.3f);
+        lightDiffuse = vec3(1.0, 0.0, 0.0);
         
-        glUniform3fv(poiLigDifLoca, 1, value_ptr(lightDiffuse));
-        glUniform3fv(poiLigSpeLoca, 1, value_ptr(lightSpecular));
-        glUniform1f(poiLigConLoca, 1.0f);
-        glUniform1f(poiLigLinLoca, 0.09f); // 衰减公式一次项系数
-        glUniform1f(poiLigQuaLoca, 0.032f); // 衰减公式二次项系数
-        
-        // 定向光
-        glUniform3fv(dirLigAmbLoca, 1, value_ptr(lightAmbient));
-        glUniform3fv(dirLigDifLoca, 1, value_ptr(lightDiffuse));
-        glUniform3fv(dirLigSpeLoca, 1, value_ptr(lightSpecular));
-        glUniform3fv(dirLigDirLoca, 1, value_ptr(camDirection)); // 定向光的方向
+        lightDiffuse = lightDiffuse * 1.0f; // 降低影响
+        glUniform3fv(lightDifLoca0, 1, value_ptr(lightDiffuse));
+        glUniform3fv(lightSpeLoca0, 1, value_ptr(lightSpecular));
+        glUniform3fv(lightDirLoca0, 1, value_ptr(camDirection)); // 定向光的方向
+        glUniform1f(lightConLoca0, 1.0f);
+        glUniform1f(lightLinLoca0, 0.09f); // 衰减公式一次项系数
+        glUniform1f(lightQuaLoca0, 0.032f); // 衰减公式二次项系数
+        glUniform1f(lightCutLoca0, cos(glm::radians(12.5f)));
         
         // 物体材质
         glUniform1f(materShiLoca, 32.0f);

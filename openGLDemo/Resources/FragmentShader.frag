@@ -1,10 +1,11 @@
 #version 330 core
 
-in vec3 inPosition; // 从顶点着色器传来的顶点坐标（类型和名称要相同）
-in vec2 inTexCoord;  // 从顶点着色器传来的纹理坐标（类型和名称要相同）
-in vec3 inNormalVec; // 从顶点着色器传来的法向量（类型和名称要相同）
-in vec3 inFragPos; // 从顶点传来的片段位置（类型和名称要相同）
-out vec4 outColor; // 片段着色器输出的变量名可以为任意，但是类型必须为vec4
+in vec3 outPosition; // 从顶点着色器传来的顶点坐标（类型和名称要相同）
+in vec2 outTexture;  // 从顶点着色器传来的纹理坐标（类型和名称要相同）
+in vec3 outNormalVec; // 从顶点着色器传来的法向量（类型和名称要相同）
+in vec3 outFragPosition; // 从顶点传来的片段位置（类型和名称要相同）
+
+out vec4 color; // 片段着色器输出的变量名可以为任意，但是类型必须为vec4
 
 // 定义一个物体的材质属性，各分量代表物体在不同光照下的颜色，同时应该给每个分量指定一个强度值，不然会显着光照很强、亮度很大，事实上，环境光照对物体颜色的影响最小。
 struct Material {
@@ -14,135 +15,65 @@ struct Material {
     float shininess; // 反光度
 };
 
-// 定向光（平行光）eg: 太阳光
-struct DirLight {
-    vec3 direction; // 定向光不需要位置
+// 光源
+struct Light {
+    vec3 position; // 如果使用定向光，则不需要光源的位置了，只需要光线的方向向量即可
+    vec3 direction; // 如果是vec4向量，齐次分量w如果为0.0，则表示为方向向量，执行定向光计算；如果w非零，则表示位置向量，根据光源的位置做光照计算
+    vec3 ambient; // 环境光照通常会设置为一个比较低的强度，因为我们不希望环境光颜色太过显眼。
+    vec3 diffuse; // 光源的漫反射分量通常设置为光所具有的颜色，通常是一个比较明亮的白色。
+    vec3 specular; // 镜面光分量通常会保持为vec3(1.0)，以最大强度发光。
     
-    vec3 ambient; // 环境光照通常会设置为一个比较低的强度，因为我们不希望环境光颜色太过显眼
-    vec3 diffuse; // 光源的漫反射分量通常设置为光所具有的颜色，通常是一个比较明亮的白色
-    vec3 specular; // 镜面光分量通常会保持为vec3(1.0)，以最大强度发光
+    float constant; // 常数项
+    float linear; // 一次项系数
+    float quadratic; // 二次项系数
+    
+    float cutOff; // 切光角，直接用余弦值表示，为了避免多余计算便于比较
+    float outerCutOff; // 外圆锥切光角，用来平滑光源
 };
-uniform DirLight dirLight;
-
-// 点光源 eg: 灯泡
-struct PointLight {
-    vec3 position;
-    
-    vec3 ambient; // 环境光照通常会设置为一个比较低的强度，因为我们不希望环境光颜色太过显眼
-    vec3 diffuse; // 光源的漫反射分量通常设置为光所具有的颜色，通常是一个比较明亮的白色
-    vec3 specular; // 镜面光分量通常会保持为vec3(1.0)，以最大强度发光
-    
-    float constant; // 计算衰减的常数项
-    float linear; // 计算衰减的一次项系数
-    float quadratic; // 计算衰减的二次项系数
-};
-#define NR_POINT_LIGHTS 1 // 点光源的数量
-uniform PointLight pointLight[NR_POINT_LIGHTS];
 
 // uniform是一种从CPU中的应用向GPU中的着色器发送数据的方式，全局的
 uniform float textureAlpha;
+
 uniform vec3 viewPosition; // 观察者的世界坐标
 uniform vec3 objectColor; // 物体的颜色
+
 uniform Material material; // 物体的材质
-
-
-/**********************************函数声明******************************************************/
-
-// 定向光的计算
-vec3 CalculateDirLight(DirLight light, vec3 normal, vec3 viewDir);
-
-// 点光源的计算
-vec3 CalculatePointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir);
-
-
-/**********************************Main函数******************************************************/
-
+uniform Light light; // 光
 
 void main() {
-    // 属性
-    vec3 viewDir = viewPosition - inFragPos;
-    
-    // 第一阶段：定向光
-    vec3 result = CalculateDirLight(dirLight, inNormalVec, viewDir);
-    
-    // 第二阶段：点光源
-    for(int i = 0; i < NR_POINT_LIGHTS; i++)
-    {
-        result += CalculatePointLight(pointLight[i], inNormalVec, inFragPos, viewDir);
-    }
-    
-    outColor = vec4(result, 1.0);
-}
-
-
-/**********************************函数实现******************************************************/
-
-vec3 CalculateDirLight(DirLight light, vec3 normal, vec3 viewDir) {
-    normal = normalize(normal); // 确保法向量（垂直于顶点表面）为单位向量
-    viewDir = normalize(viewDir); // 确保视线向量（由片段指向眼睛）为单位向量
-    
-    vec3 lightDir = normalize(-light.direction); // 由片段指向定向光源的方向向量
-    
-    float diffEffect = max(dot(normal, lightDir), 0.0f); // 漫反射影响因子
-    vec3 reflectDir = reflect(-lightDir, normal); // 第一个向量要求是从光源指向片段方向的，所以对`lightDir`取反
-    float specEffect = max(dot(reflectDir, viewDir), 0.0f); // 镜面光影响因子
-    specEffect = pow(specEffect, material.shininess); // 高光的反光度
-    
-    // 计算光照
-    vec3 ambient = light.ambient * vec3(texture(material.diffuse, inTexCoord));
-    vec3 diffuse = light.diffuse * vec3(texture(material.diffuse, inTexCoord)) * diffEffect;
-    vec3 specular = light.specular * vec3(texture(material.specular, inTexCoord)) * specEffect;
-    
-    return (ambient + diffuse + specular);
-}
-
-
-vec3 CalculatePointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir) {
-    normal = normalize(normal);
-    viewDir = normalize(viewDir);
-    
     // 点光源的衰减值
-    float distance = length(light.position - fragPos);
+    float distance = length(light.position - outFragPosition);
     float attenuation = 1.0 / (light.constant + light.linear * distance + light.quadratic * distance * distance); // 将计算后的衰减值乘以光照各个分量
     
-    vec3 lightDir = normalize(vec3(light.position - fragPos)); // @Note 一定要对向量进行标准化.
+    // 环境光照
+    vec3 ambient = light.ambient * vec3(texture(material.diffuse, outTexture)) * attenuation; // 环境光得材质颜色设置为漫反射材质颜色同样的值
     
-    float diffEffect = max(dot(normal, lightDir), 0.0f);
-    vec3 reflectDir = reflect(-lightDir, normal);
-    float specEffect = max(dot(reflectDir, viewDir), 0.0f);
-    specEffect = pow(specEffect, material.shininess); // 高光的反光度
+    // 聚光灯光照计算
+    vec3 toLight = normalize(outFragPosition - light.position); // 从片段指向光源的向量 (改成从光源指向片段也没发现有什么问题)
+    float theta = dot(toLight, normalize(light.direction)); // 夹角余弦值
+    float intensity = clamp((theta - light.outerCutOff) / (light.cutOff - light.outerCutOff), 0.0, 1.0); // 确保值在0.0~1.0之间, 再乘上漫反射和镜面光照，但不用对环境光做出影响，让它总是能有一点光
     
-    // 计算光照
-    vec3 ambient = light.ambient * vec3(texture(material.diffuse, inTexCoord)) * attenuation;
-    vec3 diffuse = light.diffuse * vec3(texture(material.diffuse, inTexCoord)) * diffEffect * attenuation;
-    vec3 specular = light.specular * vec3(texture(material.specular, inTexCoord)) * specEffect * attenuation;
+    // 漫反射光照
+    vec3 norm = normalize(outNormalVec); // 法线向量标准化，转为单位向量
+    // vec3 lightDir = normalize(light.position - outFragPosition); // 计算光源和片段位置之间的方向向量（即由片段位置指向光源位置）
+    vec3 lightDir = normalize(-light.direction); // 由片段指向定向光的方向向量
+    float affect = dot(norm, lightDir); // 两个单位向量点乘得到两者夹角的余弦值，作为光源对当前片段漫发射的影响因子
+    affect = max(affect, 0);
+    vec3 diffuse = affect * light.diffuse * vec3(texture(material.diffuse, outTexture)) * attenuation * intensity; // 从纹理中采样片段的漫反射颜色值，得到漫反射分量，夹角越大，漫反射分量就越小
     
-    return (ambient + diffuse + specular);
+    // 镜面光照
+    vec3 viewDir = normalize(viewPosition - outFragPosition); // 计算出视线方向向量
+    vec3 reflectDir = reflect(-lightDir, outNormalVec); // 通过入射向量和法向量计算出反射向量
+    float cosVar = max(dot(viewDir, reflectDir), 0); // 视线向量和反射向量夹角的余弦值
+    float spec = pow(cosVar, material.shininess); // 32是高光的反光度，一个物体的反光度越高，反射光的能力越强，散射得越少，高光点就会越小
+    // vec3 specular = spec * light.specular * vec3(texture(material.specular, outTexture)); // 计算出镜面分量
+    vec3 specular = spec * light.specular * (vec3(1.0) - vec3(texture(material.specular, outTexture))) * attenuation * intensity; // 这里反转采样颜色，黑变白、白变黑
+    
+    // 发射光
+    vec3 emission = light.ambient * vec3(texture(material.emission, outTexture));
+    
+    // 把环境分量、漫反射分量、镜面分量相加，所得结果再乘以物体的颜色，即为片段最终输出的颜色
+    vec3 result = (ambient + diffuse + specular + emission);
+    color = vec4(result, 1.0);
+    
 }
-
-/** 发射光计算
- vec3 CaculateEmissionLight () {
- light.ambient * vec3(texture(material.emission, inTexCoord));
- return emission;
- }
- */
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// ----- 分割线 ---- //
-
