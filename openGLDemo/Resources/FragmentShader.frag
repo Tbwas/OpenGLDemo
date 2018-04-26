@@ -12,6 +12,12 @@ struct Material {
     sampler2D specular; // 镜面光照贴图
     sampler2D emission; // 发光贴图
     float shininess; // 反光度
+    
+    sampler2D texture_diffuse1;
+    sampler2D texture_diffuse2;
+    sampler2D texture_diffuse3;
+    sampler2D texture_specular1;
+    sampler2D texture_specular2;
 };
 
 // 定向光（平行光）eg: 太阳光
@@ -45,7 +51,6 @@ uniform vec3 viewPosition; // 观察者的世界坐标
 uniform vec3 objectColor; // 物体的颜色
 uniform Material material; // 物体的材质
 
-
 /**********************************函数声明******************************************************/
 
 // 定向光的计算
@@ -71,9 +76,10 @@ void main() {
         result += CalculatePointLight(pointLight[i], inNormalVec, inFragPos, viewDir);
     }
     
+    // outColor = vec4(result, 1.0);
+    result = vec3(texture(material.texture_diffuse1, inTexCoord));
     outColor = vec4(result, 1.0);
 }
-
 
 /**********************************函数实现******************************************************/
 
@@ -145,4 +151,3 @@ vec3 CalculatePointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewD
 
 
 // ----- 分割线 ---- //
-

@@ -184,7 +184,7 @@ GLuint* DataSource:: setupData() {
     }
     stbi_image_free(imageData);
     
-    
+
     /*第三个纹理*/
     glActiveTexture(GL_TEXTURE2);
     glBindTexture(GL_TEXTURE_2D, textureNames[2]);

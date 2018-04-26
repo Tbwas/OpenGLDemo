@@ -16,12 +16,15 @@ out vec3 inFragPos; // 将片段的位置传递到片段着色器
 uniform mat4 model; // 模型矩阵
 uniform mat4 view;  // 视觉矩阵
 uniform mat4 projection; // 投影矩阵
+uniform mat4 modelView;
 
 void main() {
     // gl_Position设置的值会成为顶点着色器的输出
     gl_Position = projection * view * model * vec4(position, 1.0);
+    // gl_Position = projection * modelView * vec4(position, 1.0);
     inPosition = position;
     inTexCoord = vTexture;
     inNormalVec = normalVector;
     inFragPos = vec3(view * model * vec4(position, 1.0)); // 计算片段位置向量有点难以理解
 }
+
