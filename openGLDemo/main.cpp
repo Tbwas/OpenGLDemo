@@ -142,10 +142,10 @@ void initWindowMakeVisible() {
     // 片元着色器
     FragmentShader fShader;
     
-    GLuint fragmentShader0 = fShader.createFragmentShader("/Users/momo/Desktop/OpenGL学习/FragmentShader.frag");
+    GLuint fragmentShader0 = fShader.createFragmentShader("/Users/momo/Desktop/OpenGLDemo/openGLDemo/Resources/FragmentShader.frag");
     GLuint allShaders0[] = {vertexShader, fragmentShader0};
     
-    GLuint fragmentShader1 = fShader.createFragmentShader("/Users/momo/Desktop/OpenGL学习/lightShader.frag");
+    GLuint fragmentShader1 = fShader.createFragmentShader("/Users/momo/Desktop/OpenGLDemo/openGLDemo/Resources/lightShader.frag");
     GLuint allShaders1[] = {vertexShader, fragmentShader1};
     
     // 着色器程序对象
