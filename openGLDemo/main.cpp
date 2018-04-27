@@ -20,6 +20,8 @@
 #include "ShaderProgram.hpp"
 #include "DataSource.hpp"
 
+#include "FrameBuffer.hpp"
+
 using namespace std;
 using namespace glm;
 
@@ -132,7 +134,7 @@ void initWindowMakeVisible() {
     glfwSetCursorPosCallback(window, mouseCallback);
     
     
-/*------------------------------^_^---华丽的分割线---^_^-------------------------------------------------*/
+/*---------------------------------华丽的分割线----------------------------------------------------*/
 
     
     // 顶点着色器
@@ -141,189 +143,64 @@ void initWindowMakeVisible() {
     
     // 片元着色器
     FragmentShader fShader;
-    
-    GLuint fragmentShader0 = fShader.createFragmentShader("/Users/momo/Desktop/OpenGLDemo/openGLDemo/Resources/FragmentShader.frag");
-    GLuint allShaders0[] = {vertexShader, fragmentShader0};
-    
-    GLuint fragmentShader1 = fShader.createFragmentShader("/Users/momo/Desktop/OpenGLDemo/openGLDemo/Resources/lightShader.frag");
-    GLuint allShaders1[] = {vertexShader, fragmentShader1};
+    GLuint fragmentShader = fShader.createFragmentShader("/Users/momo/Desktop/OpenGLDemo/openGLDemo/Resources/FragmentShader.frag");
+    GLuint allShaders[] = {vertexShader, fragmentShader};
     
     // 着色器程序对象
     ShaderProgram program;
-    
-    GLuint shaderProgram0 = program.linkShaders(allShaders0);
-    if (shaderProgram0 == -1) {
+    GLuint shaderProgram = program.linkShaders(allShaders);
+    if (shaderProgram == -1) {
         glfwTerminate();
         exit(EXIT_SUCCESS);
     }
-    
-    GLuint shaderProgram1 = program.linkShaders(allShaders1);
-    if (shaderProgram1 == -1) {
-        glfwTerminate();
-        exit(EXIT_SUCCESS);
-    }
-    
+    glUseProgram(shaderProgram);
+
     // 数据装配
     DataSource dataSource;
-    GLuint *VAOs = dataSource.setupData();
+    GLuint VAOID = dataSource.setupData();
     
-    
-/*------------------------------^_^---华丽的分割线---^_^-------------------------------------------------*/
-   // 定义多个立方体的位置
-    vec3 cubePositions[] = {
-        glm::vec3( 0.0f,  0.0f,  0.0f),
-        glm::vec3( 2.0f,  5.0f, -15.0f),
-        glm::vec3(-1.5f, -2.2f, -2.5f),
-        glm::vec3(-3.8f, -2.0f, -12.3f),
-        glm::vec3( 2.4f, -0.4f, -3.5f),
-        glm::vec3(-1.7f,  3.0f, -7.5f),
-        glm::vec3( 1.3f, -2.0f, -2.5f),
-        glm::vec3( 1.5f,  2.0f, -2.5f),
-        glm::vec3( 1.5f,  0.2f, -1.5f),
-        glm::vec3(-1.3f,  1.0f, -1.5f)
-    };
-    
-    // 改变纹理透明度
-    textureAlphaLocation = glGetUniformLocation(shaderProgram0, "textureAlpha");
-    
-    // 模型矩阵
-    GLuint modelLoca = glGetUniformLocation(shaderProgram0, "model");
-    
-    // 视觉矩阵
-    GLuint viewLoca = glGetUniformLocation(shaderProgram0, "view");
-    
-    // 投影矩阵
-    GLuint projeLocation0 = glGetUniformLocation(shaderProgram0, "projection");
-    GLuint projeLocation1 = glGetUniformLocation(shaderProgram1, "projection");
+    // 帧缓冲配置
+    FrameBuffer frameBuffer;
     
     // 创建一个投影矩阵 - @!!!: Note 需要通过该矩阵将输入坐标转为3D标准化设备坐标.
     mat4 projection(1.0f);
     projection = perspective(radians(45.0f), (float)width / height, 0.1f, 100.0f); // 投影矩阵参数通常这样配置
     
-    // 光源
-    GLuint poiLigPosLoca = glGetUniformLocation(shaderProgram0, "pointLight[0].position");
-    GLuint poiLigAmbLoca = glGetUniformLocation(shaderProgram0, "pointLight[0].ambient");
-    GLuint poiLigDifLoca = glGetUniformLocation(shaderProgram0, "pointLight[0].diffuse");
-    GLuint poiLigSpeLoca = glGetUniformLocation(shaderProgram0, "pointLight[0].specular");
-    GLuint poiLigConLoca = glGetUniformLocation(shaderProgram0, "pointLight[0].constant");
-    GLuint poiLigLinLoca = glGetUniformLocation(shaderProgram0, "pointLight[0].linear");
-    GLuint poiLigQuaLoca = glGetUniformLocation(shaderProgram0, "pointLight[0].quadratic");
-    
-    GLuint dirLigDirLoca = glGetUniformLocation(shaderProgram0, "dirLight.direction");
-    GLuint dirLigAmbLoca = glGetUniformLocation(shaderProgram0, "dirLight.ambient");
-    GLuint dirLigDifLoca = glGetUniformLocation(shaderProgram0, "dirLight.diffuse");
-    GLuint dirLigSpeLoca = glGetUniformLocation(shaderProgram0, "dirLight.specular");
-    
-    
-    GLuint lightColorLoca = glGetUniformLocation(shaderProgram1, "lightColor");
-    
-    // 摄像机位置
-    GLuint camLocation = glGetUniformLocation(shaderProgram0, "viewPosition");
-    
-    // 物体的颜色
-    GLuint objectColorLocation = glGetUniformLocation(shaderProgram0, "objectColor");
-    
-    // 物体的材质
-    GLuint materShiLoca = glGetUniformLocation(shaderProgram0, "material.shininess");
-    
-    // 启用深度测试
-    glEnable(GL_DEPTH_TEST);
+    // 纹理采样器配置
+    glUniform1i(glGetUniformLocation(shaderProgram, "screenTexture"), 0);
     
     while (!glfwWindowShouldClose(window)) {
-        
-        // 为了避免看见上一次的渲染结果，所以在每次渲染迭代开始时清屏
-        glClearColor(0.1, 0.1, 0.1, 1.0);
-        // 清空颜色缓冲区之后颜色变为`glClearColor()`所设置的颜色
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        
-        
-        // 绘制物体
-        glUseProgram(shaderProgram0);
-        glBindVertexArray(VAOs[0]);
         
         GLfloat currentTime = glfwGetTime();
         deltaTime = currentTime - lastTime;
         lastTime = currentTime;
+        
+        glClearColor(0.1, 0.1, 0.1, 1.0);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        
+        glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer.FBOID);
+        glEnable(GL_DEPTH_TEST); // 启用深度测试
+        
+        // 绘制物体
+        glBindVertexArray(VAOID);
 
-        // 完成model-view变换，即将模型坐标系转换到世界坐标系，再转到相机坐标系
-        mat4 look(1.0f);
         float radius = 10.0f;
         float camX = sin(glfwGetTime()) * radius;
         float camZ = cos(glfwGetTime()) * radius;
         
-        /**
-         @param eye: 摄像机位置
-         @param center: 摄像机方向
-         @param up: 向上的向量
-         @discription: 如果摄像机方向定义为 vec3(0.0f, 1.0f, 0.0f)，表示指向Y轴正方向，则相对而言，摄像机就会往下偏移，从而指向Y的正方向.
-         */
-//        look = lookAt(vec3(0.0f, 0.0f, 3.0f), camDirection, vec3(0.0f, 1.0f, 0.0f));
-//        glUniformMatrix4fv(transLocation0, 1, GL_FALSE, value_ptr(look));
-        
-        mat4 view(1.0f);
-        view = glm::translate(view, vec3(0.0, 0.0, -3.0f));
-        glUniformMatrix4fv(viewLoca, 1, GL_FALSE, value_ptr(view));
-        
         mat4 model(1.0f);
         model = glm::rotate(model, glm::radians(20.0f), glm::vec3(1.0f, 0.3f, 0.5f));
+        GLuint modelLoca = glGetUniformLocation(shaderProgram, "model");
         glUniformMatrix4fv(modelLoca, 1, GL_FALSE, value_ptr(model));
-        
-        glUniformMatrix4fv(projeLocation0, 1, GL_FALSE, value_ptr(projection));
-        
-        glUniform3fv(objectColorLocation, 1, value_ptr(vec3(1.0f, 0.5f, 0.31f)));
-        glUniform3fv(camLocation, 1, value_ptr(camPosition));
-        
-        // 点光源
-        glUniform3fv(poiLigPosLoca, 1, value_ptr(vec3(1.0f, 1.0f, 3.0f)));
-        glUniform3fv(poiLigAmbLoca, 1, value_ptr(lightAmbient));
-        
-//        lightDiffuse.x = sin(glfwGetTime() * 2.0f);
-//        lightDiffuse.y = sin(glfwGetTime() * 0.7f);
-//        lightDiffuse.z = sin(glfwGetTime() * 1.3f);
-        
-        glUniform3fv(poiLigDifLoca, 1, value_ptr(lightDiffuse));
-        glUniform3fv(poiLigSpeLoca, 1, value_ptr(lightSpecular));
-        glUniform1f(poiLigConLoca, 1.0f);
-        glUniform1f(poiLigLinLoca, 0.09f); // 衰减公式一次项系数
-        glUniform1f(poiLigQuaLoca, 0.032f); // 衰减公式二次项系数
-        
-        // 定向光
-        glUniform3fv(dirLigAmbLoca, 1, value_ptr(lightAmbient));
-        glUniform3fv(dirLigDifLoca, 1, value_ptr(lightDiffuse));
-        glUniform3fv(dirLigSpeLoca, 1, value_ptr(lightSpecular));
-        glUniform3fv(dirLigDirLoca, 1, value_ptr(camDirection)); // 定向光的方向
-        
-        // 物体材质
-        glUniform1f(materShiLoca, 32.0f);
-        GLuint materDifLoca = glGetUniformLocation(shaderProgram0, "material.diffuse"); // 告诉OpenGL每个采样器对应哪个纹理单元，然后方可获取纹理对象
-        glUniform1i(materDifLoca, 0); // 0为纹理单元GL_TEXTURE0
-        GLuint materSpeLoca = glGetUniformLocation(shaderProgram0, "material.specular");
-        glUniform1i(materSpeLoca, 1);
-        GLuint materialEmiLoca = glGetUniformLocation(shaderProgram0, "material.emission");
-        glUniform1i(materialEmiLoca, 2);
-        
-        for (unsigned int i = 0; i < 10; i++) {
-            glm::mat4 model(1.0f);
-            model = glm::translate(model, cubePositions[i]);
-            float angle = 20.0f * i;
-            model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-            glUniformMatrix4fv(modelLoca, 1, GL_FALSE, value_ptr(model));
-            glDrawArrays(GL_TRIANGLES, 0, 36);
-        }
-//        glDrawArrays(GL_TRIANGLES, 0, 36);
-        glBindVertexArray(0);
-        
-        
-        // 绘制光源立方体
-        glUseProgram(shaderProgram1);
-        glBindVertexArray(VAOs[1]);
 
-        mat4 modelMatrix(1.0f); // 模型矩阵
-        modelMatrix = translate(modelMatrix, lightPosition); // 立方体默认局部坐标空间，即(0.0, 0.0, 0.0)，是看不到的，只有将立方体沿Z轴负方向移动一定的距离，才能显示出来，之后再根据需要旋转或者缩放
-        modelMatrix = scale(modelMatrix, vec3(0.2f, 0.2f, 0.2f));
-        glUniformMatrix4fv(projeLocation1, 1, GL_FALSE, value_ptr(projection));
-        glUniform3fv(lightColorLoca, 1, value_ptr(lightColor));
-
+        mat4 view(1.0f);
+        view = glm::translate(view, vec3(0.0, 0.0, -3.0f));
+        GLuint viewLoca = glGetUniformLocation(shaderProgram, "view");
+        glUniformMatrix4fv(viewLoca, 1, GL_FALSE, value_ptr(view));
+        
+        GLuint projeLoca = glGetUniformLocation(shaderProgram, "projection");
+        glUniformMatrix4fv(projeLoca, 1, GL_FALSE, value_ptr(projection));
+        
         glDrawArrays(GL_TRIANGLES, 0, 36);
         glBindVertexArray(0);
         
@@ -331,7 +208,7 @@ void initWindowMakeVisible() {
         glfwPollEvents(); // 监听事件
         
     }
-    glDeleteVertexArrays(2, VAOs); // 删除VAO
+    glDeleteVertexArrays(1, &VAOID);
     glfwTerminate();
     exit(EXIT_SUCCESS);
 }

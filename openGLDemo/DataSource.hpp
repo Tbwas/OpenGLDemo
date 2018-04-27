@@ -45,7 +45,8 @@ extern void glTexImage2D(GLenum target, GLint level, GLint internalformat, GLsiz
 class DataSource {
     
 public:
-    GLuint* setupData(); // 返回VAOs
+    GLuint setupData(); // 返回VAOs
+    unsigned char *getImageData(const char *path);
 };
 
 #endif

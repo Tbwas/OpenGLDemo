@@ -10,6 +10,7 @@
 		D8E9B2D7200D04AE00BA362E /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D8E9B2D6200D04AE00BA362E /* main.cpp */; };
 		D8E9B2DF200D056400BA362E /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D8E9B2DE200D056400BA362E /* OpenGL.framework */; };
 		D8E9B2E1200D058400BA362E /* libglfw.3.2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = D8E9B2E0200D058400BA362E /* libglfw.3.2.dylib */; };
+		FA1D88362092E5BB0035A17B /* FrameBuffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FA1D88342092E5BB0035A17B /* FrameBuffer.cpp */; };
 		FA29E4D8204E77880091374C /* ShaderProgram.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FA29E4D6204E77880091374C /* ShaderProgram.cpp */; };
 		FA2C501C2050E0C2005F9BDF /* stb_image.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FA2C501B2050E0C2005F9BDF /* stb_image.cpp */; };
 		FA2C502020510F47005F9BDF /* DataSource.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FA2C501E20510F47005F9BDF /* DataSource.cpp */; };
@@ -36,6 +37,8 @@
 		D8E9B2E0200D058400BA362E /* libglfw.3.2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libglfw.3.2.dylib; path = ../../../../usr/local/Cellar/glfw/3.2.1/lib/libglfw.3.2.dylib; sourceTree = "<group>"; };
 		FA10FE682085DE9E00B96B87 /* matrix.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = matrix.jpg; sourceTree = "<group>"; };
 		FA19AD6F207A411C00359A41 /* lightShader.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = lightShader.frag; sourceTree = "<group>"; };
+		FA1D88342092E5BB0035A17B /* FrameBuffer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = FrameBuffer.cpp; sourceTree = "<group>"; };
+		FA1D88352092E5BB0035A17B /* FrameBuffer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = FrameBuffer.hpp; sourceTree = "<group>"; };
 		FA29E4D6204E77880091374C /* ShaderProgram.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ShaderProgram.cpp; sourceTree = "<group>"; };
 		FA29E4D7204E77880091374C /* ShaderProgram.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ShaderProgram.hpp; sourceTree = "<group>"; };
 		FA29E4D9204E959F0091374C /* FragmentShader.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = FragmentShader.frag; sourceTree = "<group>"; };
@@ -356,6 +359,8 @@
 				FA2C501B2050E0C2005F9BDF /* stb_image.cpp */,
 				FA2C501F20510F47005F9BDF /* DataSource.hpp */,
 				FA2C501E20510F47005F9BDF /* DataSource.cpp */,
+				FA1D88352092E5BB0035A17B /* FrameBuffer.hpp */,
+				FA1D88342092E5BB0035A17B /* FrameBuffer.cpp */,
 				FA29E4D7204E77880091374C /* ShaderProgram.hpp */,
 				FA29E4D6204E77880091374C /* ShaderProgram.cpp */,
 				FA5D8336201C5F8F009059B5 /* VertexShader.hpp */,
@@ -762,6 +767,7 @@
 			files = (
 				FA2C502020510F47005F9BDF /* DataSource.cpp in Sources */,
 				FA5D8337201C5F8F009059B5 /* VertexShader.cpp in Sources */,
+				FA1D88362092E5BB0035A17B /* FrameBuffer.cpp in Sources */,
 				FA29E4D8204E77880091374C /* ShaderProgram.cpp in Sources */,
 				FA2C501C2050E0C2005F9BDF /* stb_image.cpp in Sources */,
 				D8E9B2D7200D04AE00BA362E /* main.cpp in Sources */,
