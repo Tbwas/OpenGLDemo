@@ -27,6 +27,7 @@ FrameBuffer::FrameBuffer() {
     // (1) 创建纹理附件
     GLuint textureID;
     glGenTextures(1, &textureID);
+    glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, textureID);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 800, 600, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr); // NULL表示仅仅分配内存却没有填充数据
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -34,8 +35,8 @@ FrameBuffer::FrameBuffer() {
     glBindTexture(GL_TEXTURE_2D, 0);
     // 将纹理附件附加到帧缓冲上
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureID, 0);
-    
-    
+
+
     // (2) 创建渲染缓冲对象附件
     GLuint RBOID;
     glGenRenderbuffers(1, &RBOID);
