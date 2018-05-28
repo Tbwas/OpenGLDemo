@@ -39,6 +39,7 @@
 		FA19AD6F207A411C00359A41 /* lightShader.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = lightShader.frag; sourceTree = "<group>"; };
 		FA1D88342092E5BB0035A17B /* FrameBuffer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = FrameBuffer.cpp; sourceTree = "<group>"; };
 		FA1D88352092E5BB0035A17B /* FrameBuffer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = FrameBuffer.hpp; sourceTree = "<group>"; };
+		FA1E075520BBFBA000627400 /* shaderSingleColor.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = shaderSingleColor.frag; sourceTree = "<group>"; };
 		FA29E4D6204E77880091374C /* ShaderProgram.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ShaderProgram.cpp; sourceTree = "<group>"; };
 		FA29E4D7204E77880091374C /* ShaderProgram.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ShaderProgram.hpp; sourceTree = "<group>"; };
 		FA29E4D9204E959F0091374C /* FragmentShader.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = FragmentShader.frag; sourceTree = "<group>"; };
@@ -704,6 +705,7 @@
 				FA2C5023205140B0005F9BDF /* VertextShader.vert */,
 				FA29E4D9204E959F0091374C /* FragmentShader.frag */,
 				FA19AD6F207A411C00359A41 /* lightShader.frag */,
+				FA1E075520BBFBA000627400 /* shaderSingleColor.frag */,
 			);
 			path = Resources;
 			sourceTree = "<group>";

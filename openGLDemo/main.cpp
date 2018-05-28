@@ -25,10 +25,11 @@
 using namespace std;
 using namespace glm;
 
-#pragma mark - Declaration
+#pragma mark - Declaration Variable
 
 GLint textureAlphaLocation;
 GLfloat textureAlpha;
+mat4 projection(1.0f);
 
 // 摄像机相关配置
 vec3 camPosition = vec3(0.0f, 0.0, 3.0f);    // 摄像机位置向量
@@ -56,10 +57,12 @@ GLfloat lastY = 240.0f; // 设置鼠标初始位置
 GLfloat pitchAngle = 0.0f; // 俯仰角
 GLfloat yawAngle = 0.0f; // 偏航角
 
+#pragma mark - Declaration Functions
 
 void initWindowMakeVisible();
 void processInputEvent(GLFWwindow *window, int key, int scanCode, int action, int mods);
 void mouseCallback(GLFWwindow *window, double xPos, double yPos);
+static __attribute__((always_inline)) void StartToDraw(GLuint VAOID, GLuint shaderProgram, bool scaleUp);
 
 /**
  应用程序使用单缓冲绘图时可能会存在图像闪烁的问题。 这是因为生成的图像不是一下子被绘制出来
@@ -79,6 +82,45 @@ GLFWAPI void glfwSwapBuffers(GLFWwindow* window);
 extern void glUniformMatrix4fv (GLint location, GLsizei count, GLboolean transpose, const GLfloat *value);
 
 
+/**
+ 该函数用来如何更新模板缓冲
+
+ @param fail 如果模板测试失败将采取的动作
+ @param zfail 如果模板测试通过，但是深度测试失败时采取的动作
+ @param zpass  如果深度测试和模板测试都通过，将采取的动作
+ *//***********************************************//*
+ GL_KEEP      保持现有的模板值
+ GL_ZERO      将模板值置为0
+ GL_REPLACE   将模板值设置为用glStencilFunc函数设置的ref值
+ GL_INCR      如果模板值不是最大值就将模板值+1
+ GL_INCR_WRAP 与GL_INCR一样将模板值+1，如果模板值已经是最大值则设为0
+ GL_DECR      如果模板值不是最小值就将模板值-1
+ GL_DECR_WRAP 与GL_DECR一样将模板值-1，如果模板值已经是最小值则设为最大值
+ GL_INVERT    Bitwise inverts the current stencil buffer value.
+ */
+extern void glStencilOp(GLenum fail, GLenum zfail, GLenum zpass);
+
+
+/**
+ 将要写入模板缓冲的模板值和mask(位掩码)进行按位与AND运算
+
+ @param func 测试函数 [GL_NEVER, GL_LESS, GL_LEQUAL, GL_GREATER, GL_GEQUAL, GL_EQUAL, GL_NOTEQUAL, and GL_ALWAYS]. 默认为GL_ALWAYS
+ @param ref 模板测试的参考值，范围[0, 2n−1], n为模板缓冲中的位面数量
+ @param mask 位掩码，和参考值进行按位与AND运算，然后跟存储的模板值进行按位与AND运算，比较两次运算结果
+ *//****************************************************//*
+   GL_NEVER    Always fails.
+   GL_LESS     Passes if(ref & mask) < (stencil & mask).
+   GL_LEQUAL   Passes if(ref & mask) <= (stencil & mask).
+   GL_GREATER  Passes if(ref & mask) > (stencil & mask).
+   GL_GEQUAL   Passes if(ref & mask) >= (stencil & mask).
+   GL_EQUAL    Passes if(ref & mask) = (stencil & mask).
+   GL_NOTEQUAL Passes if(ref & mask) != (stencil & mask).
+   GL_ALWAYS   Always passes.
+*/
+extern void glStencilFunc(GLenum func, GLint ref, GLuint mask);
+
+
+
 #pragma mark - Main
 
 int main(int argc, const char * argv[]) {
@@ -94,7 +136,7 @@ void initWindowMakeVisible() {
     if (!glfwInit()) {
         return;
     }
-
+    
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3); // 主版本3
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3); // 次版本3
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); // 核心模式
@@ -144,7 +186,12 @@ void initWindowMakeVisible() {
     // 片元着色器
     FragmentShader fShader;
     GLuint fragmentShader = fShader.createFragmentShader("/Users/momo/Desktop/OpenGLDemo/openGLDemo/Resources/FragmentShader.frag");
-    GLuint allShaders[] = {vertexShader, fragmentShader};
+    GLuint allShaders[2] = {vertexShader, fragmentShader};
+    
+    // 片元着色器
+    GLuint singleShader = fShader.createFragmentShader("/Users/momo/Desktop/OpenGLDemo/openGLDemo/Resources/shaderSingleColor.frag");
+    GLuint stencilTestShaders[2] = {vertexShader, singleShader};
+    
     
     // 着色器程序对象
     ShaderProgram program;
@@ -153,7 +200,12 @@ void initWindowMakeVisible() {
         glfwTerminate();
         exit(EXIT_SUCCESS);
     }
-    glUseProgram(shaderProgram);
+    
+    GLuint stencilTestProgram = program.linkShaders(stencilTestShaders);
+    if (stencilTestProgram == -1) {
+        glfwTerminate();
+        exit(EXIT_SUCCESS);
+    }
 
     // 数据装配
     DataSource dataSource;
@@ -163,7 +215,6 @@ void initWindowMakeVisible() {
     FrameBuffer frameBuffer;
     
     // 创建一个投影矩阵 - @!!!: Note 需要通过该矩阵将输入坐标转为3D标准化设备坐标.
-    mat4 projection(1.0f);
     projection = perspective(radians(45.0f), (float)width / height, 0.1f, 100.0f); // 投影矩阵参数通常这样配置
     
     // 纹理采样器配置
@@ -176,33 +227,29 @@ void initWindowMakeVisible() {
         lastTime = currentTime;
         
         glClearColor(0.1, 0.1, 0.1, 1.0);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
         
+        glEnable(GL_DEPTH_TEST); // 开启深度测试
+        glEnable(GL_STENCIL_TEST); // 开启模板测试
+        
+        // 模板缓冲的相关设置
+        glStencilMask(0xFF); // 启用模板缓冲的写入
+        glStencilFunc(GL_ALWAYS, 1, 0xFF); // 通过`GL_ALWAYS`我们保证了箱子的每个片段都会将模板缓冲中的值更新为1（即只要一个片段的模板值等于参考值1，片段将会通过测试并被绘制，否则会被丢弃）
+        glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE); // 设置测试失败或通过时的行为
+        
+        // 帧缓冲
         glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer.FBOID);
-        glEnable(GL_DEPTH_TEST); // 启用深度测试
         
         // 绘制物体
-        glBindVertexArray(VAOID);
-
-        float radius = 10.0f;
-        float camX = sin(glfwGetTime()) * radius;
-        float camZ = cos(glfwGetTime()) * radius;
+        StartToDraw(VAOID, shaderProgram, false);
         
-        mat4 model(1.0f);
-        model = glm::rotate(model, glm::radians(20.0f), glm::vec3(1.0f, 0.3f, 0.5f));
-        GLuint modelLoca = glGetUniformLocation(shaderProgram, "model");
-        glUniformMatrix4fv(modelLoca, 1, GL_FALSE, value_ptr(model));
-
-        mat4 view(1.0f);
-        view = glm::translate(view, vec3(0.0, 0.0, -3.0f));
-        GLuint viewLoca = glGetUniformLocation(shaderProgram, "view");
-        glUniformMatrix4fv(viewLoca, 1, GL_FALSE, value_ptr(view));
+        // 模板缓冲相关设置
+        glStencilMask(0x00); // 禁用模板缓冲的写入
+        glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+        glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
         
-        GLuint projeLoca = glGetUniformLocation(shaderProgram, "projection");
-        glUniformMatrix4fv(projeLoca, 1, GL_FALSE, value_ptr(projection));
-        
-        glDrawArrays(GL_TRIANGLES, 0, 36);
-        glBindVertexArray(0);
+        // 绘制物体
+        StartToDraw(VAOID, stencilTestProgram, true);
         
         glfwSwapBuffers(window); // 颜色缓冲区存储着GLFW窗口每一个像素颜色
         glfwPollEvents(); // 监听事件
@@ -213,7 +260,32 @@ void initWindowMakeVisible() {
     exit(EXIT_SUCCESS);
 }
 
-
+static __attribute__((always_inline)) void StartToDraw(GLuint VAOID, GLuint shaderProgram, bool scaleUp) {
+    glUseProgram(shaderProgram);
+    
+    glBindVertexArray(VAOID);
+    
+    float radius = 10.0f;
+    float __unused camX = sin(glfwGetTime()) * radius;
+    float __unused camZ = cos(glfwGetTime()) * radius;
+    
+    mat4 model(1.0f);
+    model = glm::rotate(model, glm::radians(20.0f), glm::vec3(1.0f, 0.3f, 0.5f));
+    if (scaleUp) model = glm::scale(model, glm::vec3(1.1f, 1.1f, 1.0f));
+    GLuint modelLoca = glGetUniformLocation(shaderProgram, "model");
+    glUniformMatrix4fv(modelLoca, 1, GL_FALSE, value_ptr(model));
+    
+    mat4 view(1.0f);
+    view = glm::translate(view, vec3(0.0, 0.0, -3.0f));
+    GLuint viewLoca = glGetUniformLocation(shaderProgram, "view");
+    glUniformMatrix4fv(viewLoca, 1, GL_FALSE, value_ptr(view));
+    
+    GLuint projeLoca = glGetUniformLocation(shaderProgram, "projection");
+    glUniformMatrix4fv(projeLoca, 1, GL_FALSE, value_ptr(projection));
+    
+    glDrawArrays(GL_TRIANGLES, 0, 36);
+    glBindVertexArray(0);
+}
 
 
 
