@@ -67,9 +67,9 @@ GLuint DataSource:: setupData() {
     };
   
     // VAO
-    static GLuint VAOID;
-    glGenVertexArrays(1, &VAOID);
-    glBindVertexArray(VAOID);
+    static GLuint VAOID1;
+    glGenVertexArrays(1, &VAOID1);
+    glBindVertexArray(VAOID1);
     
     // VBO
     GLuint VBOID;
@@ -101,7 +101,6 @@ GLuint DataSource:: setupData() {
     stbi_set_flip_vertically_on_load(true);
     unsigned char *imageData = stbi_load("/Users/momo/Desktop/OpenGLDemo/openGLDemo/Resources/lightBox.jpg", &width, &height, &alpha, 0);
     if (imageData) {
-        // 将图像数据被添加到纹理对象ourTexture1上
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, imageData);
         glGenerateMipmap(GL_TEXTURE_2D); // 生成多级渐远纹理
     } else {
@@ -111,7 +110,7 @@ GLuint DataSource:: setupData() {
     stbi_image_free(imageData); // 释放图片数据
 
     glBindVertexArray(0);
-    return VAOID;
+    return VAOID1;
 }
 
 unsigned char * DataSource::getImageData(const char *path) {
@@ -125,7 +124,36 @@ unsigned char * DataSource::getImageData(const char *path) {
     return nullptr;
 }
 
-
+GLuint DataSource:: quadVAO() {
+    float quadVertices[] = {
+        // positions   // texCoords
+        -1.0f, 1.0f,  0.0f, 1.0f,
+        -1.0f, -1.0f,  0.0f, 0.0f,
+        1.0f, -1.0f,  1.0f, 0.0f,
+        
+        -1.0f,  1.0f,  0.0f, 1.0f,
+        1.0f, -1.0f,  1.0f, 0.0f,
+        1.0f,  1.0f,  1.0f, 1.0f
+    };
+    
+    static GLuint VAOID2;
+    glGenVertexArrays(1, &VAOID2);
+    glBindVertexArray(VAOID2);
+    
+    GLuint VBOID;
+    glGenBuffers(1, &VBOID);
+    glBindBuffer(GL_ARRAY_BUFFER, VBOID);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+    
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void *)0);
+    glEnableVertexAttribArray(0);
+    
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void *)(2 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+    
+    glBindVertexArray(0);
+    return VAOID2;
+}
 
 
 

@@ -22,13 +22,16 @@
 
 #include "FrameBuffer.hpp"
 
+#define DX_INLINE static __attribute__((always_inline))
+
 using namespace std;
 using namespace glm;
 
-#pragma mark - Declaration
+#pragma mark - Declaration Variables
 
 GLint textureAlphaLocation;
 GLfloat textureAlpha;
+mat4 projection(1.0f);
 
 // 摄像机相关配置
 vec3 camPosition = vec3(0.0f, 0.0, 3.0f);    // 摄像机位置向量
@@ -56,10 +59,12 @@ GLfloat lastY = 240.0f; // 设置鼠标初始位置
 GLfloat pitchAngle = 0.0f; // 俯仰角
 GLfloat yawAngle = 0.0f; // 偏航角
 
+#pragma mark - Declaration Functions
 
 void initWindowMakeVisible();
 void processInputEvent(GLFWwindow *window, int key, int scanCode, int action, int mods);
 void mouseCallback(GLFWwindow *window, double xPos, double yPos);
+DX_INLINE void StartToDraw(GLuint VAOID, GLuint shaderProgram);
 
 /**
  应用程序使用单缓冲绘图时可能会存在图像闪烁的问题。 这是因为生成的图像不是一下子被绘制出来
@@ -139,35 +144,45 @@ void initWindowMakeVisible() {
     
     // 顶点着色器
     VertexShader vShader;
-    GLuint vertexShader = vShader.createVertexShader();
+    GLuint vertexShader = vShader.createVertexShader("/Users/momo/Desktop/OpenGLDemo/openGLDemo/Resources/VertextShader.vert");
+    GLuint fbVShader = vShader.createVertexShader("/Users/momo/Desktop/OpenGLDemo/openGLDemo/Resources/frameBufferVShader.vert");
     
     // 片元着色器
     FragmentShader fShader;
     GLuint fragmentShader = fShader.createFragmentShader("/Users/momo/Desktop/OpenGLDemo/openGLDemo/Resources/FragmentShader.frag");
-    GLuint allShaders[] = {vertexShader, fragmentShader};
-    
+    GLuint fbFShader = fShader.createFragmentShader("/Users/momo/Desktop/OpenGLDemo/openGLDemo/Resources/frameBufferFShader.frag");
+
     // 着色器程序对象
     ShaderProgram program;
+    
+    GLuint allShaders[2] = {vertexShader, fragmentShader};
     GLuint shaderProgram = program.linkShaders(allShaders);
     if (shaderProgram == -1) {
         glfwTerminate();
         exit(EXIT_SUCCESS);
     }
-    glUseProgram(shaderProgram);
+    
+    GLuint fbShaders[2] = {fbVShader, fbFShader};
+    GLuint fbProgram = program.linkShaders(fbShaders);
+    if (fbProgram == -1) {
+        glfwTerminate();
+        exit(EXIT_SUCCESS);
+    }
 
     // 数据装配
     DataSource dataSource;
     GLuint VAOID = dataSource.setupData();
+    GLuint fbVAOID = dataSource.quadVAO();
     
     // 帧缓冲配置
     FrameBuffer frameBuffer;
     
     // 创建一个投影矩阵 - @!!!: Note 需要通过该矩阵将输入坐标转为3D标准化设备坐标.
-    mat4 projection(1.0f);
     projection = perspective(radians(45.0f), (float)width / height, 0.1f, 100.0f); // 投影矩阵参数通常这样配置
     
     // 纹理采样器配置
     glUniform1i(glGetUniformLocation(shaderProgram, "screenTexture"), 0);
+    glUniform1i(glGetUniformLocation(fbProgram, "textureSampler"), 0);
     
     while (!glfwWindowShouldClose(window)) {
         
@@ -175,35 +190,27 @@ void initWindowMakeVisible() {
         deltaTime = currentTime - lastTime;
         lastTime = currentTime;
         
+        // 第一处理阶段
+        glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer.FBOID); // 激活我们创建的frameBuffer
         glClearColor(0.1, 0.1, 0.1, 1.0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glEnable(GL_DEPTH_TEST);
+        StartToDraw(VAOID, shaderProgram); // 数据会绘制到我们创建的frameBuffer中的附加的纹理中去
         
-        glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer.FBOID);
-        glEnable(GL_DEPTH_TEST); // 启用深度测试
         
-        // 绘制物体
-        glBindVertexArray(VAOID);
+        // 第二处理阶段
+//        glBindFramebuffer(GL_FRAMEBUFFER, 0); // 激活系统的frameBuffer
+//        glClearColor(0.1, 0.1, 0.1, 1.0);
+//        glClear(GL_COLOR_BUFFER_BIT);
+//        glDisable(GL_DEPTH_TEST);
 
-        float radius = 10.0f;
-        float camX = sin(glfwGetTime()) * radius;
-        float camZ = cos(glfwGetTime()) * radius;
-        
-        mat4 model(1.0f);
-        model = glm::rotate(model, glm::radians(20.0f), glm::vec3(1.0f, 0.3f, 0.5f));
-        GLuint modelLoca = glGetUniformLocation(shaderProgram, "model");
-        glUniformMatrix4fv(modelLoca, 1, GL_FALSE, value_ptr(model));
+//        glUseProgram(fbProgram);
+//        glBindVertexArray(fbVAOID);
+//        glBindTexture(GL_TEXTURE_2D, frameBuffer.textureID);
+//        glDrawArrays(GL_TRIANGLES, 0, 6);
+//        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // 线框模式
+//        glBindVertexArray(0);
 
-        mat4 view(1.0f);
-        view = glm::translate(view, vec3(0.0, 0.0, -3.0f));
-        GLuint viewLoca = glGetUniformLocation(shaderProgram, "view");
-        glUniformMatrix4fv(viewLoca, 1, GL_FALSE, value_ptr(view));
-        
-        GLuint projeLoca = glGetUniformLocation(shaderProgram, "projection");
-        glUniformMatrix4fv(projeLoca, 1, GL_FALSE, value_ptr(projection));
-        
-        glDrawArrays(GL_TRIANGLES, 0, 36);
-        glBindVertexArray(0);
-        
         glfwSwapBuffers(window); // 颜色缓冲区存储着GLFW窗口每一个像素颜色
         glfwPollEvents(); // 监听事件
         
@@ -213,8 +220,31 @@ void initWindowMakeVisible() {
     exit(EXIT_SUCCESS);
 }
 
-
-
+DX_INLINE void StartToDraw(GLuint VAOID, GLuint shaderProgram) {
+    glUseProgram(shaderProgram);
+    
+    glBindVertexArray(VAOID);
+    
+    float radius = 10.0f;
+    float __unused camX = sin(glfwGetTime()) * radius;
+    float __unused camZ = cos(glfwGetTime()) * radius;
+    
+    mat4 model(1.0f);
+    model = glm::rotate(model, glm::radians(20.0f), glm::vec3(1.0f, 0.3f, 0.5f));
+    GLuint modelLoca = glGetUniformLocation(shaderProgram, "model");
+    glUniformMatrix4fv(modelLoca, 1, GL_FALSE, value_ptr(model));
+    
+    mat4 view(1.0f);
+    view = glm::translate(view, vec3(0.0, 0.0, -3.0f));
+    GLuint viewLoca = glGetUniformLocation(shaderProgram, "view");
+    glUniformMatrix4fv(viewLoca, 1, GL_FALSE, value_ptr(view));
+    
+    GLuint projeLoca = glGetUniformLocation(shaderProgram, "projection");
+    glUniformMatrix4fv(projeLoca, 1, GL_FALSE, value_ptr(projection));
+    
+    glDrawArrays(GL_TRIANGLES, 0, 36);
+    glBindVertexArray(0);
+}
 
 
 

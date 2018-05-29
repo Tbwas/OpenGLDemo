@@ -54,13 +54,13 @@ VertexShader:: VertexShader(const GLchar *sourceCodePath) {
 }
  */
 
-GLuint VertexShader:: createVertexShader() {
+GLuint VertexShader:: createVertexShader(std::string path) {
     
     // 从文件路径获得vertex源码
     ifstream fileStream;
     ostringstream strStream;
     string vShaderString;
-    string vShaderPath = "/Users/momo/Desktop/OpenGLDemo/openGLDemo/Resources/VertextShader.vert";
+    string vShaderPath = path;
     
     // 保证文件流对象可以抛出异常
     fileStream.exceptions(ifstream::badbit);

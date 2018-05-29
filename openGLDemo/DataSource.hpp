@@ -47,6 +47,8 @@ class DataSource {
 public:
     GLuint setupData(); // 返回VAOs
     unsigned char *getImageData(const char *path);
+    
+    GLuint quadVAO();
 };
 
 #endif

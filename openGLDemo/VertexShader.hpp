@@ -25,7 +25,7 @@ public:
     // 构造器读取并构建顶点着色器
 //    VertexShader(const GLchar *sourceCodePath);
     
-    uint32_t createVertexShader();
+    uint32_t createVertexShader(std::string path);
 };
 
 

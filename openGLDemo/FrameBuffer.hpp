@@ -21,6 +21,7 @@
 class FrameBuffer {
 public:
     GLuint FBOID;
+    GLuint textureID; // 用于外部从该纹理中读取像素数据
     FrameBuffer();
 };
 

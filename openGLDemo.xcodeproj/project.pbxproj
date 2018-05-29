@@ -318,6 +318,8 @@
 		FA5526D72052A478000FCBA3 /* vector_relational.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = vector_relational.hpp; sourceTree = "<group>"; };
 		FA5D8335201C5F8F009059B5 /* VertexShader.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = VertexShader.cpp; sourceTree = "<group>"; };
 		FA5D8336201C5F8F009059B5 /* VertexShader.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = VertexShader.hpp; sourceTree = "<group>"; };
+		FA67424020BD3DB400416719 /* frameBufferVShader.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = frameBufferVShader.vert; sourceTree = "<group>"; };
+		FA67424120BD3E0100416719 /* frameBufferFShader.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = frameBufferFShader.frag; sourceTree = "<group>"; };
 		FAE7EEC82080D8AB0043962A /* highLight.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = highLight.jpg; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -704,6 +706,8 @@
 				FA2C5023205140B0005F9BDF /* VertextShader.vert */,
 				FA29E4D9204E959F0091374C /* FragmentShader.frag */,
 				FA19AD6F207A411C00359A41 /* lightShader.frag */,
+				FA67424020BD3DB400416719 /* frameBufferVShader.vert */,
+				FA67424120BD3E0100416719 /* frameBufferFShader.frag */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
