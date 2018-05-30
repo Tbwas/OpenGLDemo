@@ -32,6 +32,12 @@ using namespace glm;
 GLint textureAlphaLocation;
 GLfloat textureAlpha;
 mat4 projection(1.0f);
+FrameBuffer frameBuffer;
+DataSource dataSource;
+
+VertexShader vShader;
+FragmentShader fShader;
+ShaderProgram program;
 
 // 摄像机相关配置
 vec3 camPosition = vec3(0.0f, 0.0, 3.0f);    // 摄像机位置向量
@@ -64,7 +70,9 @@ GLfloat yawAngle = 0.0f; // 偏航角
 void initWindowMakeVisible();
 void processInputEvent(GLFWwindow *window, int key, int scanCode, int action, int mods);
 void mouseCallback(GLFWwindow *window, double xPos, double yPos);
-DX_INLINE void StartToDraw(GLuint VAOID, GLuint shaderProgram);
+
+DX_INLINE void startToDisplay1(GLuint VAOID, GLuint program);
+DX_INLINE void startToDisplay2(GLuint VAOID, GLuint program);
 
 /**
  应用程序使用单缓冲绘图时可能会存在图像闪烁的问题。 这是因为生成的图像不是一下子被绘制出来
@@ -128,33 +136,19 @@ void initWindowMakeVisible() {
     int width, height;
     glfwGetFramebufferSize(window, &width , &height);
     glViewport(0, 0, width, height); // 原点位于左下角
-
-    // 注册按键回调
-    glfwSetKeyCallback(window, processInputEvent);
-    
-    // 不显示光标并且捕捉它
-//    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-    
-    // 监听鼠标移动事件
-    glfwSetCursorPosCallback(window, mouseCallback);
-    
     
 /*---------------------------------华丽的分割线----------------------------------------------------*/
 
     
     // 顶点着色器
-    VertexShader vShader;
     GLuint vertexShader = vShader.createVertexShader("/Users/momo/Desktop/OpenGLDemo/openGLDemo/Resources/VertextShader.vert");
     GLuint fbVShader = vShader.createVertexShader("/Users/momo/Desktop/OpenGLDemo/openGLDemo/Resources/frameBufferVShader.vert");
     
     // 片元着色器
-    FragmentShader fShader;
     GLuint fragmentShader = fShader.createFragmentShader("/Users/momo/Desktop/OpenGLDemo/openGLDemo/Resources/FragmentShader.frag");
     GLuint fbFShader = fShader.createFragmentShader("/Users/momo/Desktop/OpenGLDemo/openGLDemo/Resources/frameBufferFShader.frag");
 
     // 着色器程序对象
-    ShaderProgram program;
-    
     GLuint allShaders[2] = {vertexShader, fragmentShader};
     GLuint shaderProgram = program.linkShaders(allShaders);
     if (shaderProgram == -1) {
@@ -170,19 +164,13 @@ void initWindowMakeVisible() {
     }
 
     // 数据装配
-    DataSource dataSource;
     GLuint VAOID = dataSource.setupData();
     GLuint fbVAOID = dataSource.quadVAO();
-    
-    // 帧缓冲配置
-    FrameBuffer frameBuffer;
     
     // 创建一个投影矩阵 - @!!!: Note 需要通过该矩阵将输入坐标转为3D标准化设备坐标.
     projection = perspective(radians(45.0f), (float)width / height, 0.1f, 100.0f); // 投影矩阵参数通常这样配置
     
-    // 纹理采样器配置
-    glUniform1i(glGetUniformLocation(shaderProgram, "screenTexture"), 0);
-    glUniform1i(glGetUniformLocation(fbProgram, "textureSampler"), 0);
+    frameBuffer.GenerateFBO(width, height);
     
     while (!glfwWindowShouldClose(window)) {
         
@@ -190,29 +178,16 @@ void initWindowMakeVisible() {
         deltaTime = currentTime - lastTime;
         lastTime = currentTime;
         
-        // 第一处理阶段
-        glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer.FBOID); // 激活我们创建的frameBuffer
-        glClearColor(0.1, 0.1, 0.1, 1.0);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glEnable(GL_DEPTH_TEST);
-        StartToDraw(VAOID, shaderProgram); // 数据会绘制到我们创建的frameBuffer中的附加的纹理中去
+        /** PASS 1 **/
+        startToDisplay1(VAOID, shaderProgram);
         
+        /** PASS 2 **/
+        startToDisplay2(fbVAOID, fbProgram);
         
-        // 第二处理阶段
-//        glBindFramebuffer(GL_FRAMEBUFFER, 0); // 激活系统的frameBuffer
-//        glClearColor(0.1, 0.1, 0.1, 1.0);
-//        glClear(GL_COLOR_BUFFER_BIT);
-//        glDisable(GL_DEPTH_TEST);
+        // @Tips: PASS1禁用深度测试, PASS2开启深度测试, 结果发现深度测试没有生效, 说明PASS2绘制的内容是从我们创建的frameBuffer读取的纹理数据, 即创建的frameBuffer成功.
 
-//        glUseProgram(fbProgram);
-//        glBindVertexArray(fbVAOID);
-//        glBindTexture(GL_TEXTURE_2D, frameBuffer.textureID);
-//        glDrawArrays(GL_TRIANGLES, 0, 6);
-//        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // 线框模式
-//        glBindVertexArray(0);
-
-        glfwSwapBuffers(window); // 颜色缓冲区存储着GLFW窗口每一个像素颜色
-        glfwPollEvents(); // 监听事件
+        glfwSwapBuffers(window);
+        glfwPollEvents();
         
     }
     glDeleteVertexArrays(1, &VAOID);
@@ -220,127 +195,75 @@ void initWindowMakeVisible() {
     exit(EXIT_SUCCESS);
 }
 
-DX_INLINE void StartToDraw(GLuint VAOID, GLuint shaderProgram) {
-    glUseProgram(shaderProgram);
+DX_INLINE void startToDisplay1(GLuint VAOID, GLuint program) {
+    glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer.FBOID);
     
-    glBindVertexArray(VAOID);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClearColor(0.1, 0.1, 0.1, 1.0);
     
-    float radius = 10.0f;
-    float __unused camX = sin(glfwGetTime()) * radius;
-    float __unused camZ = cos(glfwGetTime()) * radius;
+    glUseProgram(program);
+    glEnable(GL_DEPTH_TEST);
     
     mat4 model(1.0f);
     model = glm::rotate(model, glm::radians(20.0f), glm::vec3(1.0f, 0.3f, 0.5f));
-    GLuint modelLoca = glGetUniformLocation(shaderProgram, "model");
+    GLuint modelLoca = glGetUniformLocation(program, "model");
     glUniformMatrix4fv(modelLoca, 1, GL_FALSE, value_ptr(model));
     
     mat4 view(1.0f);
     view = glm::translate(view, vec3(0.0, 0.0, -3.0f));
-    GLuint viewLoca = glGetUniformLocation(shaderProgram, "view");
+    GLuint viewLoca = glGetUniformLocation(program, "view");
     glUniformMatrix4fv(viewLoca, 1, GL_FALSE, value_ptr(view));
     
-    GLuint projeLoca = glGetUniformLocation(shaderProgram, "projection");
+    GLuint projeLoca = glGetUniformLocation(program, "projection");
     glUniformMatrix4fv(projeLoca, 1, GL_FALSE, value_ptr(projection));
     
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, dataSource.textureID);
+    glUniform1i(glGetUniformLocation(program, "renderTexture"), 0);
+    
+    glBindVertexArray(VAOID);
     glDrawArrays(GL_TRIANGLES, 0, 36);
     glBindVertexArray(0);
+    
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+}
+
+DX_INLINE void startToDisplay2(GLuint VAOID, GLuint program) {
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClearColor(0.1, 0.5, 0.1, 1.0);
+    
+    glUseProgram(program);
+    glDisable(GL_DEPTH_TEST);
+    
+    glActiveTexture(GL_TEXTURE0 + 1);
+    glBindTexture(GL_TEXTURE_2D, frameBuffer.textureID);
+    glUniform1i(glGetUniformLocation(program, "textureSampler"), 1);
+    
+    glBindVertexArray(VAOID);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+    glBindVertexArray(0);
+    
 }
 
 
 
-/**
- 按键回调
- 
- @param window 窗口
- @param key 被按下的键
- @param scanCode 按键的系统扫描代码
- @param action 被按下还是被释放
- @param mods 表示是否有Ctrl、Shift、Alt等按钮操作
- */
-void processInputEvent(GLFWwindow *window, int key, int scanCode, int action, int mods) {
-    cout<< "key is:" << key <<endl;
-    cout<< "scanCode is:" << scanCode <<endl;
-    cout<< "action is:" << action <<endl;
-    cout<< "mods is:" << mods <<endl;
-    
-    float camSpeed = 2.5f * deltaTime;
-    
-    if (glfwGetKey(window, key) == GLFW_PRESS) {
-        switch (key) {
-            case GLFW_KEY_ESCAPE:
-                glfwSetWindowShouldClose(window, true); // 设置window关闭flag，注意线程安全
-                glfwTerminate();
-                exit(EXIT_SUCCESS);
-                break;
-            
-            case GLFW_KEY_UP:
-                textureAlpha += 0.1;
-                textureAlpha = textureAlpha > 1.0 ? 1.0 : textureAlpha;
-                glUniform1f(textureAlphaLocation, textureAlpha);
-                break;
-                
-            case GLFW_KEY_DOWN:
-                textureAlpha -= 0.1;
-                textureAlpha = textureAlpha < 0.0 ? 0.0 : textureAlpha;
-                glUniform1f(textureAlphaLocation, textureAlpha);
-                break;
-                
-            case GLFW_KEY_W:
-                camPosition -= camSpeed * camDirection;
-                break;
-                
-            case GLFW_KEY_S:
-                camPosition += camSpeed * camDirection;
-                break;
-                
-            case GLFW_KEY_A:
-                camPosition -= cross(camDirection, camUp) * camSpeed;
-                break;
-                
-            case GLFW_KEY_D:
-                camPosition += cross(camDirection, camUp) * camSpeed;
-                break;
-                
-            default:
-                break;
-        }
-    }
-}
 
 
-/**
- 鼠标移动回调
 
- @param window 窗口
- @param xPos x位置
- @param yPos y位置
- */
-void mouseCallback(GLFWwindow *window, double xPos, double yPos) {
-    return;
-    
-    cout << "鼠标在移动, x: " << xPos << " y: " << yPos << endl;
-    
-    float xOffset = xPos - lastX;
-    float yOffset = lastY - yPos; // 这里是相反的，因为鼠标向下移动yPos是增大的，而我们希望是鼠标向上移动增大的
-    lastX = xPos;
-    lastY = yPos;
-    
-    float sensitivity = 0.5;
-    xOffset *= sensitivity;
-    yOffset *= sensitivity;
-    
-    pitchAngle += yOffset;
-    yawAngle += xOffset;
-    
-    // 做个大小限制
-    pitchAngle = pitchAngle > 89.0f ? 89.0f : pitchAngle < -89.0f ? -89.0 : pitchAngle;
-    
-    // 通过俯仰角和偏航角来计算方向向量
-    vec3 direction(1.0f);
-    direction.x = -cos(radians(pitchAngle)) * cos(radians(yawAngle));
-    direction.y = -sin(radians(pitchAngle));
-    direction.z = -cos(radians(pitchAngle)) * sin(radians(yawAngle));
-    camDirection = direction;
-    
-}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

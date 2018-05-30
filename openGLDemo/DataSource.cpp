@@ -87,9 +87,7 @@ GLuint DataSource:: setupData() {
     
     
     // 纹理
-    GLuint textureID;
     glGenTextures(1, &textureID);
-    glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, textureID);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE); // s轴环绕方式
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE); // t轴环绕方式
@@ -99,7 +97,7 @@ GLuint DataSource:: setupData() {
     // 使用图片数据生成纹理并保存在纹理对象中
     int width, height, alpha;
     stbi_set_flip_vertically_on_load(true);
-    unsigned char *imageData = stbi_load("/Users/momo/Desktop/OpenGLDemo/openGLDemo/Resources/lightBox.jpg", &width, &height, &alpha, 0);
+    unsigned char *imageData = stbi_load("/Users/momo/Desktop/OpenGLDemo/openGLDemo/Resources/cute.jpg", &width, &height, &alpha, 0);
     if (imageData) {
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, imageData);
         glGenerateMipmap(GL_TEXTURE_2D); // 生成多级渐远纹理
