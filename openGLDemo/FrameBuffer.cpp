@@ -27,14 +27,13 @@ void FrameBuffer:: GenerateFBO(unsigned int width, unsigned int height) {
     /*@Note: 如果texture attachment绑定到frameBuffer中的`GL_COLOR_ATTACHMENT0`, 则下面这两行代码无需调用, 默认情况下在colorBuffer0中绘制.
              如果绑定到其他值`GL_COLOR_ATTACHMENT.n`, 则下面两行代码必须调用, 并且数组drawBuffer中的元素必须是对应的`GL_COLOR_ATTACHMENT.n`*/
     GLenum drawBuffers[1] = {GL_COLOR_ATTACHMENT0};
-    glDrawBuffers(1, drawBuffers); // 告诉OpenGL将在哪些buffer中绘制
+    glDrawBuffers(1, drawBuffers); // 将fragmentShader输出的内容绘制到frameBuffer中指定的colorBuffer中
     
     // depth attachment
-    GLuint RBOID;
     glGenRenderbuffers(1, &RBOID);
     glBindRenderbuffer(GL_RENDERBUFFER, RBOID);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height); // only allocate memory (must do this).
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, RBOID);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height); // only allocate memory (must do this).
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, RBOID);
     
     // check it is completed
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE) {
@@ -44,6 +43,16 @@ void FrameBuffer:: GenerateFBO(unsigned int width, unsigned int height) {
         printf("当前创建的帧缓冲不完整");
         abort();
     }
+}
+
+void FrameBuffer:: bindFBO(GLuint width, GLuint height) {
+    glBindFramebuffer(GL_FRAMEBUFFER, FBOID);
+    glViewport(0, 0, width, height);
+}
+
+void FrameBuffer:: unBindFBO(GLuint width, GLuint height) {
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glViewport(0, 0, width, height);
 }
 
 

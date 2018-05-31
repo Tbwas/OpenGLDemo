@@ -21,8 +21,8 @@
 class FrameBuffer {
     
 public:
-    GLuint FBOID;
     GLuint textureID; // 用于外部从该纹理中读取像素数据
+    GLuint RBOID; // 用于外部从renderBuffer中读取深度值
     
     FrameBuffer (){
         printf("FrameBuffer initialized.");
@@ -32,14 +32,17 @@ public:
         destory();
     }
     
-    /// Keep in mind that when you resize your window, you have to resize these textures too and call this method.
     void GenerateFBO(unsigned int width, unsigned height);
+    void bindFBO(GLuint width, GLuint height);
+    void unBindFBO(GLuint width, GLuint height);
     
 private:
+    GLuint FBOID;
+    
     void destory() {
         glDeleteFramebuffers(1, &FBOID);
         glDeleteTextures(1, &textureID);
     }
 };
 
-#endif /* FrameBuffer_hpp */
+#endif 

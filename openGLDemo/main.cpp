@@ -29,41 +29,19 @@ using namespace glm;
 
 #pragma mark - Declaration Variables
 
-GLint textureAlphaLocation;
-GLfloat textureAlpha;
-mat4 projection(1.0f);
-FrameBuffer frameBuffer;
-DataSource dataSource;
+GLint screenWidth;
+GLint screenHeight;
 
 VertexShader vShader;
 FragmentShader fShader;
 ShaderProgram program;
 
-// 摄像机相关配置
-vec3 camPosition = vec3(0.0f, 0.0, 3.0f);    // 摄像机位置向量
-vec3 camDirection = vec3(0.0f, 0.0f, -1.0f); // 摄像机方向向量
-vec3 camUp = vec3(0.0f, 1.0f, 0.0f); // 向上向量
-
-// 光源的相关配置
-vec3 lightColor(1.0f, 1.0f, 1.0f);
-vec3 lightPosition(0.1, 0.5, -2.0);
-vec3 lightAmbient(0.2f, 0.2f, 0.2f);
-vec3 lightDiffuse(0.5f, 0.5f, 0.5f);
-vec3 lightSpecular(1.0f, 1.0f, 1.0f);
-
-// 物体材质的相关配置
-vec3 materialAmbient(1.0f, 0.5f, 0.31f);
-vec3 materialDiffuse(1.0f, 0.5f, 0.31f);
-vec3 materialSpecular(0.5f, 0.5f, 0.5f);
+FrameBuffer frameBuffer;
+DataSource dataSource;
+mat4 projection(1.0f);
 
 GLfloat deltaTime = 0.0f; // 当前帧与上一帧绘制的时间差，用来平衡不同硬件间的移动速度
 GLfloat lastTime = 0.0f;
-
-// 鼠标配置相关
-GLfloat lastX = 320.0f; // 设置鼠标初始位置
-GLfloat lastY = 240.0f; // 设置鼠标初始位置
-GLfloat pitchAngle = 0.0f; // 俯仰角
-GLfloat yawAngle = 0.0f; // 偏航角
 
 #pragma mark - Declaration Functions
 
@@ -133,9 +111,8 @@ void initWindowMakeVisible() {
     
     // 我们必须告诉OpenGL渲染窗口的尺寸大小，这样OpenGL才只能知道怎样相对于窗口大小显示数据和坐标
     // OpenGL幕后使用glViewport中定义的位置和宽高进行2D坐标的转换，将OpenGL中的位置坐标(标准化设备坐标)转换为你的屏幕坐标
-    int width, height;
-    glfwGetFramebufferSize(window, &width , &height);
-    glViewport(0, 0, width, height); // 原点位于左下角
+    glfwGetFramebufferSize(window, &screenWidth , &screenHeight);
+    glViewport(0, 0, screenWidth, screenHeight); // 原点位于左下角
     
 /*---------------------------------华丽的分割线----------------------------------------------------*/
 
@@ -168,9 +145,9 @@ void initWindowMakeVisible() {
     GLuint fbVAOID = dataSource.quadVAO();
     
     // 创建一个投影矩阵 - @!!!: Note 需要通过该矩阵将输入坐标转为3D标准化设备坐标.
-    projection = perspective(radians(45.0f), (float)width / height, 0.1f, 100.0f); // 投影矩阵参数通常这样配置
+    projection = perspective(radians(45.0f), (float)screenWidth / screenHeight, 0.1f, 100.0f); // 投影矩阵参数通常这样配置
     
-    frameBuffer.GenerateFBO(width, height);
+    frameBuffer.GenerateFBO(screenWidth, screenHeight);
     
     while (!glfwWindowShouldClose(window)) {
         
@@ -196,9 +173,9 @@ void initWindowMakeVisible() {
 }
 
 DX_INLINE void startToDisplay1(GLuint VAOID, GLuint program) {
-    glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer.FBOID);
+    frameBuffer.bindFBO(screenWidth, screenHeight);
     
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // 清空frameBuffer中的内容
     glClearColor(0.1, 0.1, 0.1, 1.0);
     
     glUseProgram(program);
@@ -225,13 +202,12 @@ DX_INLINE void startToDisplay1(GLuint VAOID, GLuint program) {
     glDrawArrays(GL_TRIANGLES, 0, 36);
     glBindVertexArray(0);
     
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
+    frameBuffer.unBindFBO(screenWidth, screenHeight);
 }
 
 DX_INLINE void startToDisplay2(GLuint VAOID, GLuint program) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glClearColor(0.1, 0.5, 0.1, 1.0);
+    glClearColor(0.1, 0.1, 0.1, 1.0);
     
     glUseProgram(program);
     glDisable(GL_DEPTH_TEST);
@@ -243,7 +219,6 @@ DX_INLINE void startToDisplay2(GLuint VAOID, GLuint program) {
     glBindVertexArray(VAOID);
     glDrawArrays(GL_TRIANGLES, 0, 6);
     glBindVertexArray(0);
-    
 }
 
 
