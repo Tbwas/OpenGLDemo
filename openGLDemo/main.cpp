@@ -241,4 +241,3 @@ DX_INLINE void startToDisplay2(GLuint VAOID, GLuint program) {
 
 
 
-
