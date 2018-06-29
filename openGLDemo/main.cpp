@@ -97,6 +97,8 @@ extern void glUniformMatrix4fv (GLint location, GLsizei count, GLboolean transpo
  GL_DECR      如果模板值不是最小值就将模板值-1
  GL_DECR_WRAP 与GL_DECR一样将模板值-1，如果模板值已经是最小值则设为最大值
  GL_INVERT    Bitwise inverts the current stencil buffer value.
+                                                     
+ 默认情况下glStencilOp是设置为(GL_KEEP, GL_KEEP, GL_KEEP)的，所以不论任何测试的结果是如何，模板缓冲都会保留它的值。
  */
 extern void glStencilOp(GLenum fail, GLenum zfail, GLenum zpass);
 
@@ -105,7 +107,7 @@ extern void glStencilOp(GLenum fail, GLenum zfail, GLenum zpass);
  将要写入模板缓冲的模板值和mask(位掩码)进行按位与AND运算
 
  @param func 测试函数 [GL_NEVER, GL_LESS, GL_LEQUAL, GL_GREATER, GL_GEQUAL, GL_EQUAL, GL_NOTEQUAL, and GL_ALWAYS]. 默认为GL_ALWAYS
- @param ref 模板测试的参考值，范围[0, 2n−1], n为模板缓冲中的位面数量
+ @param ref 模板测试的参考值，模板缓冲中的内容将会与这个值进行比较，范围[0, 2n−1], n为模板缓冲中的位面数量
  @param mask 位掩码，和参考值进行按位与AND运算，然后跟存储的模板值进行按位与AND运算，比较两次运算结果
  *//****************************************************//*
    GL_NEVER    Always fails.
@@ -233,22 +235,22 @@ void initWindowMakeVisible() {
         glEnable(GL_STENCIL_TEST); // 开启模板测试
         
         // 模板缓冲的相关设置
-        glStencilMask(0xFF); // 启用模板缓冲的写入
+        glStencilMask(0xFF); // 设置位掩码：1111 1111. 每个二进制位都是1，这样就保证了和将要写入缓冲的模板值进行AND运算之后，不影响输出，进而才能启用模板值写入. (默认位掩码如此，即所有位都是1)
         glStencilFunc(GL_ALWAYS, 1, 0xFF); // 通过`GL_ALWAYS`我们保证了箱子的每个片段都会将模板缓冲中的值更新为1（即只要一个片段的模板值等于参考值1，片段将会通过测试并被绘制，否则会被丢弃）
-        glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE); // 设置测试失败或通过时的行为
+        glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE); // 如果其中的一个测试失败了，我们什么都不做，我们仅仅保留当前储存在模板缓冲中的值。如果模板测试和深度测试都通过了，那么我们希望将储存的模板值设置为参考值1.
         
         // 帧缓冲
         glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer.FBOID);
         
-        // 绘制物体
+        // 绘制物体 - 箱子
         StartToDraw(VAOID, shaderProgram, false);
         
-        // 模板缓冲相关设置
-        glStencilMask(0x00); // 禁用模板缓冲的写入
-        glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
-        glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+        // 至此，通过上述模板相关函数的调用设置，模板缓冲在箱子被绘制的地方都更新为1了。
+        glStencilMask(0x00); // 禁用模板缓冲的写入, 避免接下来的操作影响模板缓冲中的值
+        glStencilFunc(GL_NOTEQUAL, 1, 0xFF); // 我们将模板函数设置为GL_NOTEQUAL，它会保证我们只绘制箱子上模板值不为1的部分，即只绘制箱子在之前绘制的箱子之外的部分
+//        glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP); 这个函数不需要，因为我们并不想更新模板缓冲中的值，仅仅是读取其中的值来进行比较
         
-        // 绘制物体
+        // 绘制物体 - 颜色背景
         StartToDraw(VAOID, stencilTestProgram, true);
         
         glfwSwapBuffers(window); // 颜色缓冲区存储着GLFW窗口每一个像素颜色
